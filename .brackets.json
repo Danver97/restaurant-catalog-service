@@ -1,0 +1,10 @@
+{
+    "custom-region-fold.startRegionWord": "rst",
+    "custom-region-fold.endRegionWord": "rcl",
+    "language": {
+        "javascript": {
+            "linting.prefer": ["ESLint"],
+            "linting.usePreferredOnly": true
+        }
+    }
+}
