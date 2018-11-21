@@ -1,10 +1,10 @@
 const assert = require('assert');
 const ENV = require('../src/env');
 
-const Table = require('../models/table');
-const Restaurant = require('../models/restaurant');
-const restMgr = require('../modules/restaurantManager');
-const dbmanager = require('../modules/repositoryManager');
+const Table = require('../domain/models/table');
+const Restaurant = require('../domain/models/restaurant');
+const db = require('../infrastructure/repository/repositoryManager')('testdb');
+const restMgr = require('../domain/logic/restaurantManager')(db);
 
 function wait(ms) {
     const start = Date.now();
@@ -29,9 +29,9 @@ describe('Restaurant Manager unit test', function () {
     
     before(() => {
         if (ENV.node_env === 'test')
-            dbmanager.reset();
+            db.reset();
         else if (ENV.node_env === 'test_event_sourcing')
-            dbmanager.store.reset();
+            db.reset(); // .store 
     });
     
     it('check if restaurantCreated() works properly', async function () {

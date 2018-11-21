@@ -1,7 +1,7 @@
 const assert = require('assert');
-const Restaurant = require('../../models/restaurant');
-const Table = require('../../models/table');
-const db = require('../../modules/repositoryManager');
+const Restaurant = require('../../domain/models/restaurant');
+const Table = require('../../domain/models/table');
+const db = require('../../infrastructure/repository/repositoryManager');
 
 let passed = true;
 const timeout = 1;

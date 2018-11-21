@@ -1,23 +1,16 @@
 const assert = require('assert');
+const uuid = require('uuid/v4');
 const request = require('supertest');
 const app = require('../src/app');
-const ENV = require('../src/env');
-const db = require('../modules/repositoryManager');
 const assertStrictEqual = require('../lib/utils').assertStrictEqual;
 
-const Table = require('../models/table');
-const Restaurant = require('../models/restaurant');
+const Table = require('../domain/models/table');
+const Restaurant = require('../domain/models/restaurant');
 
 const req = request(app);
 // const req = request('localhost:3000');
 
 describe('Integration test', function () {
-    before(() => {
-        if (ENV.node_env === 'test')
-            db.reset();
-        else if (ENV.node_env === 'test_event_sourcing')
-            db.store.reset();
-    });
     
     it('service test', async function () {
         await req.get('/')
@@ -29,7 +22,7 @@ describe('Integration test', function () {
     context('Create and destroy restaurant', function () {
         const name = 'I quattro cantoni';
         const owner = 'Giacomo';
-        const rest = new Restaurant(20, name, owner);
+        const rest = new Restaurant(uuid(), name, owner);
         
         it('post /restaurant/create', async function () {
             await req.post('/restaurant/create')
@@ -71,7 +64,7 @@ describe('Integration test', function () {
     context('Add and remove tables from restaurant', function () {
         const name = 'I quattro cantoni';
         const owner = 'Giacomo';
-        const rest = new Restaurant(21, name, owner);
+        const rest = new Restaurant(uuid(), name, owner);
         
         it('post /restaurant/create', async function () {
             await req.post('/restaurant/create')

@@ -1,7 +1,7 @@
 const assert = require('assert');
-const Restaurant = require('../../models/restaurant');
-const Table = require('../../models/table');
-const RestaurantError = require('../../errors/restaurant_error');
+const Restaurant = require('../../domain/models/restaurant');
+const Table = require('../../domain/models/table');
+const RestaurantError = require('../../domain/errors/restaurant_error');
 
 let passed = true;
 

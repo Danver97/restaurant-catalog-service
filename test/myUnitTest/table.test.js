@@ -1,5 +1,5 @@
 const assert = require('assert');
-const Table = require('../../models/table');
+const Table = require('../../domain/models/table');
 
 let passed = true;
 if(process.env.NODE_TEST_TYPE === 'mytest') {

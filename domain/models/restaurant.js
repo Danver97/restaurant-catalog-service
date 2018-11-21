@@ -1,6 +1,6 @@
 const RestaurantError = require('../errors/restaurant_error');
 const Table = require('./table');
-const checker = require('../lib/checkers');
+const checker = require('../../lib/checkers');
 
 class Restaurant {
     constructor(restId, name, owner) {

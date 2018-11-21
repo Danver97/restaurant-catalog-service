@@ -1,23 +1,23 @@
 const assert = require('assert');
 const ENV = require('../src/env');
+const uuid = require('uuid/v4');
 
-const Table = require('../models/table');
-const Restaurant = require('../models/restaurant');
-const RestaurantError = require('../errors/restaurant_error');
-const db = require('../modules/repositoryManager');
+const Table = require('../domain/models/table');
+const Restaurant = require('../domain/models/restaurant');
+const RestaurantError = require('../domain/errors/restaurant_error');
+const db = require('../infrastructure/repository/repositoryManager')();
 const assertStrictEqual = require('../lib/utils').assertStrictEqual;
 
 const waitAsync = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
-const waitAsyncTimeout = 0;
+const waitAsyncTimeout = 50;
 
 describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
     
-    let id = 1;
     const name = 'Tavola dei quattro venti';
     const owner = 'Luca';
-    let rest = new Restaurant(id++, name, owner);
+    let rest = new Restaurant(uuid(), name, owner);
     let tables;
-    const rest2 = new Restaurant(id++, name, owner);
+    const rest2 = new Restaurant(uuid(), name, owner);
     let tables2;
     const cb = (err, event) => {
         const doIt = false;
@@ -26,13 +26,6 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
             console.log(event);
         }
     };
-    
-    before(() => {
-        if (ENV.node_env === 'test')
-            db.reset();
-        else if (ENV.node_env === 'test_event_sourcing')
-            db.store.reset();
-    });
     
     it('check if Restaurant is created', async function () {
         await db.restaurantCreated(rest, cb);
@@ -66,9 +59,10 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
     });
     
     it('check if first Restaurant tables are added', async function () {
-        rest = new Restaurant(id++, name, owner);
+        rest = new Restaurant(uuid(), name, owner);
         await db.restaurantCreated(rest, cb);
         
+        await waitAsync(waitAsyncTimeout);
         // tables = rest.addTable(new Table(1, rest.id, 4));
         const restFromDb = await db.getRestaurant(rest.id);
         tables = restFromDb.addTable(new Table(1, rest.id, 4));
@@ -84,6 +78,8 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
     
     it('check if second Restaurant tables are added', async function () {
         await db.restaurantCreated(rest2, cb);
+        
+        await waitAsync(waitAsyncTimeout);
         // tables2 = rest2.addTable(new Table(1, rest2.id, 4));
         const restFromDb = await db.getRestaurant(rest2.id);
         tables2 = restFromDb.addTable(new Table(1, rest2.id, 4));
@@ -105,11 +101,11 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         
         await waitAsync(waitAsyncTimeout);
         const response = await db.getRestaurant(rest2.id);
-        // assert.strictEqual(JSON.stringify(response.tables), JSON.stringify([]));
-        assertStrictEqual(response.tables, []);
+        assert.strictEqual(JSON.stringify(response.tables), JSON.stringify([]));
+        // assertStrictEqual(response.tables, []);
     });
     
-    it('check if second Restaurant tables are removed', async function () {
+    it('check if first Restaurant tables are removed', async function () {
         const restFromDb = await db.getRestaurant(rest.id);
         // tables = rest.removeTable(1);
         // await db.tableRemoved(rest, tables);
@@ -118,7 +114,7 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         
         await waitAsync(waitAsyncTimeout);
         const response = await db.getRestaurant(rest.id);
-        // assert.strictEqual(JSON.stringify(response.tables), JSON.stringify([]));
-        assertStrictEqual(response.tables, []);
+        assert.strictEqual(JSON.stringify(response.tables), JSON.stringify([]));
+        // assertStrictEqual(response.tables, []);
     });
 });

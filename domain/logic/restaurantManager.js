@@ -1,22 +1,26 @@
 const Restaurant = require('../models/restaurant');
-const dbmanager = require('./repositoryManager');
-const checker = require('../lib/checkers');
+const checker = require('../../lib/checkers');
 
 /* TODO:
  * - Add command handlers that publish events on the event broker.
  * - Add event handlers that persist events on the event store.
 */
 
+const dependencies = {
+    dbmanager: null,
+    broker: null,
+};
+
 // Command handlers
 // rst
 function restaurantCreated(res, cb) {
+    const dbmanager = dependencies.dbmanager;
     return new Promise(async (resolve, reject) => {
         try {
             const rest = new Restaurant(res.id, res.restaurantName, res.owner);
             await dbmanager.restaurantCreated(rest, cb);
             resolve(rest);
         } catch (e) {
-            console.log(e);
             reject(e);
         }
     });
@@ -24,6 +28,7 @@ function restaurantCreated(res, cb) {
 }
 
 function restaurantRemoved(restId, cb) {
+    const dbmanager = dependencies.dbmanager;
     return new Promise(async (resolve, reject) => {
         try {
             checker.checkRestId(restId);
@@ -38,6 +43,7 @@ function restaurantRemoved(restId, cb) {
 }
 
 function tableAdded(restId, table, cb) {
+    const dbmanager = dependencies.dbmanager;
     return new Promise(async (resolve, reject) => {
         try {
             checker.checkRestId(restId);
@@ -57,6 +63,7 @@ function tableAdded(restId, table, cb) {
 }
 
 function tableRemoved(restId, table, cb) {
+    const dbmanager = dependencies.dbmanager;
     return new Promise(async (resolve, reject) => {
         try {
             checker.checkRestId(restId);
@@ -76,6 +83,7 @@ function tableRemoved(restId, table, cb) {
 }
 
 function tablesAdded(restId, tablesArr, cb) {
+    const dbmanager = dependencies.dbmanager;
     return new Promise(async (resolve, reject) => {
         try {
             checker.checkRestId(restId);
@@ -98,6 +106,7 @@ function tablesAdded(restId, tablesArr, cb) {
 }
 
 function tablesRemoved(restId, tablesArr, cb) {
+    const dbmanager = dependencies.dbmanager;
     return new Promise(async (resolve, reject) => {
         try {
             checker.checkRestId(restId);
@@ -121,6 +130,7 @@ function tablesRemoved(restId, tablesArr, cb) {
 // rcl
 
 function getTables(restId, cb) {
+    const dbmanager = dependencies.dbmanager;
     const result = new Promise(async (resolve, reject) => {
         try {
             let rest = await dbmanager.getRestaurant(restId, cb);
@@ -137,6 +147,7 @@ function getTables(restId, cb) {
 }
 
 function getRestaurant(restId, cb) {
+    const dbmanager = dependencies.dbmanager;
     const result = new Promise(async (resolve, reject) => {
         try {
             const rest = await dbmanager.getRestaurant(restId, cb);
@@ -150,13 +161,19 @@ function getRestaurant(restId, cb) {
     return result;
 }
 
-module.exports = {
-    restaurantCreated,
-    restaurantRemoved,
-    tableAdded,
-    tableRemoved,
-    tablesAdded,
-    tablesRemoved,
-    getRestaurant,
-    getTables,
-};
+function restaurantManager(store) {
+    // if (!dependencies.dbmanager)
+    dependencies.dbmanager = store;
+    return {
+        restaurantCreated,
+        restaurantRemoved,
+        tableAdded,
+        tableRemoved,
+        tablesAdded,
+        tablesRemoved,
+        getRestaurant,
+        getTables,
+    };
+}
+
+module.exports = restaurantManager;

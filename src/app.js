@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const restaurantManager = require('../modules/restaurantManager');
-const Table = require('../models/table');
+const repositoryManager = require('../infrastructure/repository/repositoryManager')();
+const restaurantManager = require('../domain/logic/restaurantManager')(repositoryManager);
+const Table = require('../domain/models/table');
 
 const app = express();
 
@@ -20,15 +21,15 @@ app.get('/restaurants', (req, res) => {
 
 app.get('/restaurant', async (req, res) => {
     const query = req.query;
-    if(!query.restId) {
+    if (!query.restId) {
         res.status(400);
-        res.json({message: 'Missing query restId parameter.'});
+        res.json({ message: 'Missing query restId parameter.' });
         return;
     }
     try {
         const rest = await restaurantManager.getRestaurant(query.restId);
         res.json(rest);
-    } catch(e) {
+    } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
@@ -36,7 +37,7 @@ app.get('/restaurant', async (req, res) => {
 
 app.get('/restaurant/tables', async (req, res) => {
     const query = req.query;
-    if(!query.restId) {
+    if (!query.restId) {
         res.status(400);
         res.json({ error: 'Missing query restId parameter.' });
         return;
@@ -44,7 +45,7 @@ app.get('/restaurant/tables', async (req, res) => {
     try {
         const tables = await restaurantManager.getTables(req.query.restId);
         res.json(tables);
-    } catch(e) {
+    } catch (e) {
         console.log(e);
         res.status(e.code || 500);
         res.json({ error: e });
@@ -60,7 +61,7 @@ app.post('/restaurant/create', async (req, res) => {
     try {
         await restaurantManager.restaurantCreated(req.body);
         res.redirect(301, `/restaurant/${req.body.restId}`);
-    } catch(e) {
+    } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
@@ -73,11 +74,11 @@ app.post('/restaurant/remove', async (req, res) => {
         return;
     }
     try {
-        req.body.id = parseInt(req.body.id);
+        req.body.id = parseInt(req.body.id, 10);
         await restaurantManager.restaurantRemoved(req.body.id);
         res.status(200);
         res.json({ message: 'success' });
-    } catch(e) {
+    } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
@@ -90,11 +91,11 @@ app.post('/restaurant/addTable', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or table).' });
         return;
     }
-    body.restId = parseInt(body.restId)
+    body.restId = parseInt(body.restId, 10);
     try {
         const table = JSON.parse(body.table);
         body.table = new Table(table.id, table.restaurantId, table.people);
-    } catch(e) {
+    } catch (e) {
         res.status(400);
         res.json({ error: 'Wrong parameter: table should be a JSON object.' });
         return;
@@ -102,11 +103,10 @@ app.post('/restaurant/addTable', async (req, res) => {
     try {
         await restaurantManager.tableAdded(body.restId, body.table);
         res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
-    } catch(e) {
+    } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
-    
 });
 
 app.post('/restaurant/removeTable', async (req, res) => {
@@ -116,16 +116,16 @@ app.post('/restaurant/removeTable', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or table).' });
         return;
     }
-    body.restId = parseInt(body.restId)
+    body.restId = parseInt(body.restId, 10);
     if (typeof body.table === 'string') {
-        const parsed = parseInt(body.table);
-        if(!isNaN(parsed)) {
+        const parsed = parseInt(body.table, 10);
+        if (!isNaN(parsed))
             body.table = parsed;
-        } else {
+        else {
             try {
                 const table = JSON.parse(body.table);
                 body.table = new Table(table.id, table.restaurantId, table.people);
-            } catch(e) {
+            } catch (e) {
                 res.status(400);
                 res.json({ error: 'Wrong parameter: table should be a JSON object or a number.' });
                 return;
@@ -135,7 +135,7 @@ app.post('/restaurant/removeTable', async (req, res) => {
     try {
         await restaurantManager.tableRemoved(body.restId, body.table);
         res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
-    } catch(e) {
+    } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
@@ -148,11 +148,11 @@ app.post('/restaurant/addTables', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or tables).' });
         return;
     }
-    body.restId = parseInt(body.restId)
+    body.restId = parseInt(body.restId, 10);
     try {
         body.tables = JSON.parse(body.tables);
-//        console.log('body.tables');
-//        console.log(body.tables);
+        // console.log('body.tables');
+        // console.log(body.tables);
         if (!Array.isArray(body.tables))
             throw new Error('Is not array');
         if (body.tables.length > 0 && typeof body.tables[0] !== 'object')
@@ -179,16 +179,16 @@ app.post('/restaurant/removeTables', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or tables).' });
         return;
     }
-    body.restId = parseInt(body.restId)
+    body.restId = parseInt(body.restId, 10);
     try {
         body.tables = JSON.parse(req.body.tables);
-        if(!Array.isArray(body.tables))
+        if (!Array.isArray(body.tables))
             throw new Error('Is not array');
-        if(body.tables.length > 0 && typeof body.tables[0] !== 'object' && typeof body.tables[0] !== 'number')
+        if (body.tables.length > 0 && typeof body.tables[0] !== 'object' && typeof body.tables[0] !== 'number')
             throw new Error('Is not array of number or objects');
-        if(body.tables.length > 0 && typeof body.tables[0] === 'object')
+        if (body.tables.length > 0 && typeof body.tables[0] === 'object')
             body.tables = body.tables.map(t => new Table(t.id, t.restaurantId, t.people));
-    } catch(e) {
+    } catch (e) {
         res.status(400);
         res.json({ error: 'Wrong parameter: table should be a JSON array of objects.' });
         return;
@@ -196,7 +196,7 @@ app.post('/restaurant/removeTables', async (req, res) => {
     try {
         await restaurantManager.tablesRemoved(body.restId, body.tables);
         res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
-    } catch(e) {
+    } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }

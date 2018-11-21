@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk/global');
 const DDB = require('aws-sdk/clients/dynamodb');
+const ddb = require('./modules/db/dynamodb');
 
 const AWSinit = require('./lib/AWS');
 
@@ -67,4 +68,35 @@ async function init() {
 
 // init();
 
-AWSinit.init();
+// AWSinit.init();
+
+function waitAsync(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function burstEvents() {
+    await AWSinit.init();
+    for (let i = 0; i < 10; i++) {
+        await ddb.save('a', i, i + ' Message', {});
+        await waitAsync(1000);
+    }
+    const sqsConfig = AWSinit.sqs;
+    const sqs = sqsConfig.sqs;
+    const params = {
+        QueueUrl: await sqsConfig.getQueueUrl(),
+        AttributeNames: ['All'],
+        MaxNumberOfMessages: 10,
+        
+    };
+    await waitAsync(10000);
+    for (let i = 0; i < 10; i++) {
+        const response = await sqs.receiveMessage(params).promise();
+        if (response.Messages) {
+            console.log(response.Messages.map(m => JSON.parse(m.Body).Message));
+        }
+    }
+}
+
+burstEvents();

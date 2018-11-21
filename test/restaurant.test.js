@@ -1,7 +1,7 @@
 const assert = require('assert');
-const Table = require('../models/table');
-const Restaurant = require('../models/restaurant');
-const RestaurantError = require('../errors/restaurant_error');
+const Table = require('../domain/models/table');
+const Restaurant = require('../domain/models/restaurant');
+const RestaurantError = require('../domain/errors/restaurant_error');
 
 describe('Restaurant class unit test', function () {
     const name = 'Tavola dei quattro venti';
