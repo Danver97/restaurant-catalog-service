@@ -151,6 +151,11 @@ function getRestaurant(restId, cb) {
     const result = new Promise(async (resolve, reject) => {
         try {
             const rest = await dbmanager.getRestaurant(restId, cb);
+            if (rest.status === 'removed') {
+                const err = new Error('Restaurant not found');
+                err.code = 404;
+                throw err;
+            }
             resolve(rest);
         } catch (e) {
             reject(e);

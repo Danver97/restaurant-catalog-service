@@ -12,7 +12,7 @@ function restaurantCreated(rest, cb) {
 
 function restaurantRemoved(rest, cb) {
     return Promisify(async () => {
-        await this.save(rest.id, rest._revisionId, restaurantEvents.restaurantRemoved, { id: rest.id });
+        await this.save(rest.id, rest._revisionId, restaurantEvents.restaurantRemoved, { id: rest.id, status: 'removed' });
         if (rest._revisionId) rest._revisionId++;
     }, cb);
     // return this.save(rest.id, rest._revisionId, restaurantEvents.restaurantRemoved, { id: rest.id }, cb);

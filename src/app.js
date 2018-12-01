@@ -28,6 +28,7 @@ app.get('/restaurant', async (req, res) => {
     }
     try {
         const rest = await restaurantManager.getRestaurant(query.restId);
+        // console.log(rest);
         res.json(rest);
     } catch (e) {
         res.status(e.code || 500);
@@ -74,7 +75,6 @@ app.post('/restaurant/remove', async (req, res) => {
         return;
     }
     try {
-        req.body.id = parseInt(req.body.id, 10);
         await restaurantManager.restaurantRemoved(req.body.id);
         res.status(200);
         res.json({ message: 'success' });
@@ -91,7 +91,6 @@ app.post('/restaurant/addTable', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or table).' });
         return;
     }
-    body.restId = parseInt(body.restId, 10);
     try {
         const table = JSON.parse(body.table);
         body.table = new Table(table.id, table.restaurantId, table.people);
@@ -116,7 +115,6 @@ app.post('/restaurant/removeTable', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or table).' });
         return;
     }
-    body.restId = parseInt(body.restId, 10);
     if (typeof body.table === 'string') {
         const parsed = parseInt(body.table, 10);
         if (!isNaN(parsed))
@@ -148,7 +146,6 @@ app.post('/restaurant/addTables', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or tables).' });
         return;
     }
-    body.restId = parseInt(body.restId, 10);
     try {
         body.tables = JSON.parse(body.tables);
         // console.log('body.tables');
@@ -179,7 +176,6 @@ app.post('/restaurant/removeTables', async (req, res) => {
         res.json({ error: 'Missing some required parameters (restId or tables).' });
         return;
     }
-    body.restId = parseInt(body.restId, 10);
     try {
         body.tables = JSON.parse(req.body.tables);
         if (!Array.isArray(body.tables))

@@ -39,7 +39,7 @@ describe('Integration test', function () {
             await req.get(`/restaurant?restId=${rest.id}`)
                 .expect(res => {
                     const result = res.body;
-                    result.id = parseInt(result.id, 10);
+                    // result.id = parseInt(result.id, 10);
                     const expected = JSON.parse(JSON.stringify(rest));
                     // assert.deepStrictEqual(result, expected);
                     assertStrictEqual(result, expected);
