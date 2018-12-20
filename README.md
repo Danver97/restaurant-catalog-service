@@ -44,4 +44,3 @@ A big part of the entire project is still under development. In particular every
 - Replay events from the event store (on AWS: DynamoDB) (this stage is optional if the projection is "up to date")
 - Enqueue them in an event broker (on AWS: SQS)
 - Poll the event broker and make events deduplication & idempotency checks before applying them on the projection.
-
