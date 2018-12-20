@@ -43,5 +43,3 @@ A big part of the entire project is still under development. In particular every
 - Enqueue them in an event broker (on AWS: SQS)
 - Poll the event broker and make events deduplication & idempotency checks before applying them on the projection.
 
-The main focus is now in having everything tested properly and ensure that the project is still "infrastructure independent": the goal is to define an interface for event store and event broker in order to easily move from the cloud to a local deployment (or from one cloud provider to another) just using new implementations for event store and event broker. (**Done: 21/11/2018**)
-
