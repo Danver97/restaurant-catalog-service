@@ -12,6 +12,8 @@ The microservice is implemented using the following patterns:
 
 This pattern is used for maintain business logic from infrastructure logic as indipendent as possibile. This leads to having a big easiness in mocking injected dependencies in each module of the business and infrastructure logic and simplifies unit and integration testing code.
 
+It allowed also to develop this project "infrastructure independent": changing the actual implementation of the event store and the event broker it's very easy to switch from an infrastructure to another (from cloud to local, from one cloud provider to another) while preserving each piece of the business and infrastructure logic intact.
+
 ## Event Store
 
 As event-driven data management, Event sourcing was the best fit. It's atomicy of storing and publishing events and the possibility to implement temporal queries made it a good choice.
