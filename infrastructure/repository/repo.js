@@ -1,6 +1,16 @@
 const Restaurant = require('../../domain/models/restaurant');
 const restaurantEvents = require('../../lib/restaurant-events');
 const Promisify = require('../../lib/utils').promisify;
+const RepositoryError = require('../errors/repo_error');
+
+async function saveEvent(db, streamId, eventId, message, payload) {
+    try {
+        await db.save(streamId, eventId, message, payload);
+    } catch (e) {
+        if (e.code === 'cazzo ne so')
+            throw new RepositoryError('RepositoryError: Aggregate not up to date', 401);
+    }
+}
 
 function restaurantCreated(rest, cb) {
     return Promisify(async () => {

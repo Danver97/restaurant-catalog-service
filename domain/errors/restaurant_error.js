@@ -1,4 +1,4 @@
-const ExtendableError = require('./extendable_error');
+const ExtendableError = require('../../lib/errors/extendable_error');
 
 class RestaurantError extends ExtendableError {}
 
