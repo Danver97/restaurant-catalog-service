@@ -26,14 +26,11 @@ Event sourcing leads to **CQRS** to implement queries.
 
 ## Setup
 
-### Build
-`npm install`
-
-### Run
-`npm start`
-
-### Test
-`npm test`
+```
+npm install
+npm test
+npm start
+```
 
 ## News
 
