@@ -8,15 +8,21 @@ The microservice is implemented using the following patterns:
 - Command Query Responsibility Segregation
 - Onion architecture
 
+## Onion architecture
+
+This pattern is used for maintain business logic from infrastructure logic as indipendent as possibile. This leads to having a big easiness in mocking injected dependencies in each module of the business and infrastructure logic and simplifies unit and integration testing code.
+
 ## Event Store
+
+As event-driven data management, Event sourcing was the best fit. It's atomicy of storing and publishing events and the possibility to implement temporal queries made it a good choice.
 
 For testing purposes, the microservice relies on an in-memory mocked event store database (you can find it under `restaurant-catalog-service/lib/eventSourcing/eventStore/testdb`).
 
-For production purposes, it relies on Amazon DynamoDB or any other event store that implements the following [interface]().
+For production purposes, it relies on Amazon DynamoDB or any other event store that implements the following [interface](https://github.com/Danver97/restaurant-catalog-service/blob/master/lib/eventSourcing/eventStore/index.js).
 
-## CQRS
+On AWS the event are published using triggers on DynamoDB Streams which invokes an AWS Lambda function that publishes the event to an AWS SNS topic that is resposible to deliver the event to all the subscribed AWS SQS queues (tipically 1 queue for each microservice of the system).
 
-This pattern was chosen for its flexibility in creating new data projections starting from event streams.
+Event sourcing leads to **CQRS** to implement queries.
 
 ## Setup
 
