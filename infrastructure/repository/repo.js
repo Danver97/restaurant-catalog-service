@@ -1,6 +1,6 @@
+const Promisify = require('promisify-cb');
 const Restaurant = require('../../domain/models/restaurant');
 const restaurantEvents = require('../../lib/restaurant-events');
-const Promisify = require('../../lib/utils').promisify;
 const RepositoryError = require('../errors/repo_error');
 
 async function saveEvent(db, streamId, eventId, message, payload) {

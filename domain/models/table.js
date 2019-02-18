@@ -7,7 +7,7 @@ class Table {
         this.restaurantId = restaurantId;
         this.people = people;
     }
-    
+
     static fromObject(obj) {
         const table = new Table(obj.id, obj.restaurantId, obj.people);
         const classKeys = ['id', 'restaurantId', 'people'];
