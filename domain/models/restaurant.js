@@ -10,7 +10,7 @@ class Restaurant {
         this.owner = owner;
         this.tables = [];
     }
-    
+
     static fromObject(obj) {
         const rest = new Restaurant(obj.id, obj.restaurantName, obj.owner);
         if (obj.tables)
@@ -70,5 +70,4 @@ class Restaurant {
         return this.tables;
     }
 }
-
 module.exports = Restaurant;

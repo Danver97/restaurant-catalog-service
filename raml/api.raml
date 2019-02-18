@@ -1,0 +1,119 @@
+#%RAML 1.0
+title: GitHub API
+version: v1
+baseUri: https://api.thefork.com/api/{version}
+protocols: [ HTTP, HTTPS ]
+types:
+  Timetable:
+    properties:
+      start: time-only
+      end: time-only
+    example:
+      start: 11:00:00
+      end: 15:00:00
+  TimetableArray:
+    type: array
+    minItems: 1
+    maxItems: 3
+    items: Timetable | null
+    uniqueItems: true
+  WeekTimetable:
+    properties:
+      mon: TimetableArray
+      tue: TimetableArray
+      wed: TimetableArray
+      thu: TimetableArray
+      fri: TimetableArray
+      sat: TimetableArray
+      sun: TimetableArray
+  Table:
+    properties:
+      id: string
+      people: number
+    example:
+      id: 1a5f5de8
+      people: 15
+  Restaurant:
+    properties:
+      id: string
+      owner: string
+      timetable: WeekTimetable
+      tables:
+        type: Table[]
+        minItems: 1
+    example:
+      id: a5f9d8e8
+      owner: Christian
+      timetable:
+        mon:
+          - start: 11:00:00
+            end: 15:00:00
+        tue:
+          - start: 11:00:00
+            end: 15:00:00
+        wed:
+          - start: 11:00:00
+            end: 15:00:00
+        thu:
+          - start: 11:00:00
+            end: 15:00:00
+        fri:
+          - start: 11:00:00
+            end: 15:00:00
+        sat:
+          - null
+        sun:
+          - null
+      tables:
+        - id: 4fe5ad8f
+          people: 6
+        - id: 4fe5ad90
+          people: 4
+/restaurant:
+  post:
+    description: Creates a new restaurant.
+    body:
+      application/json:
+        type: Restaurant
+    responses:
+      200:
+      401:
+  get:
+    description: Get a restaurant.
+    queryParameters:
+      location:
+        description: GPS coordinates.
+        type: string
+        required: true
+    responses:
+      200:
+        description: |
+          Returns the restaurants nearby
+          the "location" query parameter.
+        body:
+          application/json:
+            type: Restaurant[]
+      401:
+  /{restId}:
+    get:
+      description: Get a restaurant by id.
+      responses:
+        200:
+          description: Returns the Restarant with id "restId"
+          body:
+            application/json:
+              type: Restaurant
+        401:
+    put:
+      description: Updates a restarant by id.
+      body:
+        application/json:
+          type: Restaurant
+      responses:
+        200:
+        401:
+    delete:
+      description: Deletes a restarant by id.
+      responses:
+        200:
+        401:
