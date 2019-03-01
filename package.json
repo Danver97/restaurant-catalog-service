@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "test": "mocha",
-    "test-coverage": "nyc mocha"
+    "test": "mocha ./test/test",
+    "test-coverage": "nyc mocha ./test/test"
   },
   "author": "Christian Paesante",
   "license": "ISC",

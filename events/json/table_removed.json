@@ -1,0 +1,10 @@
+{
+    "streamId": "string",
+    "eventId": {
+        "$or": ["string", "number"]
+    },
+    "message": "string",
+    "payload": {
+        "tables": "array",
+    }
+}
