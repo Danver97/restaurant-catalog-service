@@ -20,6 +20,7 @@ function exportFunc(db) {
     else
         repo = repoImpl(dbs[db]);
     implem.checkImplementation(interf, repo);
+    console.log(`Repo started with: ${db || ENV.event_store}`);
     return repo;
 }
 
