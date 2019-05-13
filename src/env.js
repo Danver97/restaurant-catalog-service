@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 
-if (process.env.NODE_ENV !== 'production') 
+if (process.env.NODE_ENV !== 'production')
     dotenv.load();
 
 const ENV = {
@@ -17,7 +17,7 @@ ENV.port = process.env.PORT || 3000;
 ENV.node_env = process.env.NODE_ENV || 'test';
 ENV.infrastructure = process.env.INFRASTRUCTURE;
 
-ENV.event_store = process.env.EVENT_STORE || 'testdb';
+ENV.event_store = process.env.EVENT_STORE || 'testbroker';
 ENV.event_broker = process.env.EVENT_BROKER || 'testdb';
 
 ENV.dbname = process.env.DB_NAME || 'testdb';

@@ -4,3 +4,4 @@ Dockerfile
 .nyc_output
 .eslintignore
 .eslintrc.json
+.env
