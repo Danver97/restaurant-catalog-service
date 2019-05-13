@@ -60,37 +60,6 @@ function restaurantCreatedEvent(restId, owner) {
     });
 }
 
-function reservationCreatedEvent(reservation) {
-    return basicEvent(reservation.id, 1, 'reservationCreated', {
-        restId: likeUuid(reservation.restId),
-        resId: likeUuid(reservation.id),
-        /* userId: likeUuid(userId),
-        reservationName: like(reservationName),
-        people: like(people),
-        date, */
-    });
-}
-
-function reservationAddedEvent(reservation) {
-    const r = reservation
-    return basicEvent(reservation.restId, 1, 'reservationAdded', {
-        // restId: likeUuid(reservation.restId),
-        resId: likeUuid(reservation.id),
-        table: likeTable(r.table.id, r.table.people),
-        date: iso8601DateTimeWithMillis(reservation.date.toJSON()),
-    });
-}
-
-function reservationCancelledEvent(reservation) {
-    return basicEvent(reservation.id, 1, 'reservationCancelled', {
-        restId: likeUuid(reservation.restId),
-        resId: likeUuid(reservation.id),
-    });
-}
-
 module.exports = {
     restaurantCreatedEvent,
-    reservationCreatedEvent,
-    reservationAddedEvent,
-    reservationCancelledEvent,
 };
