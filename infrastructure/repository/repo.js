@@ -14,8 +14,9 @@ async function saveEvent(db, streamId, eventId, message, payload) {
 
 function restaurantCreated(rest, cb) {
     return Promisify(async () => {
-        await this.save(rest.id, rest._revisionId, restaurantEvents.restaurantCreated, Object.assign({}, rest));
+        const e = await this.save(rest.id, rest._revisionId, restaurantEvents.restaurantCreated, Object.assign({}, rest));
         if (rest._revisionId) rest._revisionId++;
+        return e;
     }, cb);
     // return this.save(rest.id, rest._revisionId, restaurantEvents.restaurantCreated, Object.assign({}, rest), cb);
 }

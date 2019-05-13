@@ -4,14 +4,16 @@ const Restaurant = require('../../../domain/models/restaurant');
 // const testUtils = require('../../test-utils');
 const Interactor = require('./utils');
 
-function restaurantCreated() {
+async function restaurantCreated() {
     const r = new Restaurant(uuid(), 'Risto', 'Gino'); // testUtils.timeTable, testUtils.tables
-    return repo.restaurantCreated(r);
+    const e = await repo.restaurantCreated(r);
+    console.log(e);
+    return e;
 }
 
 const p = new Interactor({
     messageProviders: {
-        // restaurantCreated,
+        restaurantCreated,
     }
 });
 
