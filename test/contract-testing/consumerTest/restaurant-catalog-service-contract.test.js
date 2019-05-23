@@ -5,8 +5,8 @@ const eventContent = require('./eventContent');
 const Interactor = require('./utils');
 
 const interactor = new Interactor({
-    consumer: 'restaurant-service',  // TODO: parametrize
-    provider: 'restaurant-service',
+    consumer: 'restaurant-catalog-service',  // TODO: parametrize
+    provider: 'restaurant-catalog-service',
 });
 
 describe('Restaurant Service Contract Testing', function () {
