@@ -47,7 +47,6 @@ app.get('/restaurant/tables', async (req, res) => {
         const tables = await restaurantManager.getTables(req.query.restId);
         res.json(tables);
     } catch (e) {
-        console.log(e);
         res.status(e.code || 500);
         res.json({ error: e });
     }
