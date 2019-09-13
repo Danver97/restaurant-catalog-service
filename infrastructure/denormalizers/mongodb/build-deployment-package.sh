@@ -3,5 +3,7 @@ DIRNAME=$(dirname $0)
 CWD=$(pwd)
 cd $DIRNAME
 npm install
+zip -r mongodb.zip .
+rm -r ./node_modules
 cd $CWD
-zip -r mongodb.zip $DIRNAME
+mv $DIRNAME/mongodb.zip $CWD
