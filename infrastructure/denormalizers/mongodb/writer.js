@@ -60,7 +60,7 @@ class Writer {
     // Write handlers
 
     restaurantCreated(restaurant, cb) {
-        restaurant._id = restaurant.restId;
+        restaurant._id = restaurant.restId || restaurant.id;
         restaurant._revisionId = 1;
         return Promisify(() => this.collection.insertOne(restaurant), cb);
     }
