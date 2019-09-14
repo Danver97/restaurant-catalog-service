@@ -6,3 +6,4 @@ coverage
 .brackets.json
 .env
 prova.js
+*.zip
