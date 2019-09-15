@@ -1,10 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const repositoryManager = require('../infrastructure/repository/repositoryManager')();
-const restaurantManager = require('../domain/logic/restaurantManager')(repositoryManager);
+/*const repositoryManager = require('../infrastructure/repository/repositoryManager')();
+const restaurantManager = require('../domain/logic/restaurantManager')(repositoryManager);*/
 const Table = require('../domain/models/table');
 
 const app = express();
+let restaurantMgr = null;
+let queryMgr = null;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -13,6 +15,11 @@ app.get('/', (req, res) => {
     res.json({
         service: 'restaurant-catalog-service',
     });
+});
+
+app.get('/nearme', async (req, res) => {
+    const docs = await queryMgr.nearme();
+    res.json(docs);
 });
 
 app.get('/restaurants', (req, res) => {
@@ -27,7 +34,7 @@ app.get('/restaurant', async (req, res) => {
         return;
     }
     try {
-        const rest = await restaurantManager.getRestaurant(query.restId);
+        const rest = await restaurantMgr.getRestaurant(query.restId);
         // console.log(rest);
         res.json(rest);
     } catch (e) {
@@ -44,7 +51,7 @@ app.get('/restaurant/tables', async (req, res) => {
         return;
     }
     try {
-        const tables = await restaurantManager.getTables(req.query.restId);
+        const tables = await restaurantMgr.getTables(req.query.restId);
         res.json(tables);
     } catch (e) {
         res.status(e.code || 500);
@@ -59,7 +66,7 @@ app.post('/restaurant/create', async (req, res) => {
         return;
     }
     try {
-        await restaurantManager.restaurantCreated(req.body);
+        await restaurantMgr.restaurantCreated(req.body);
         res.redirect(301, `/restaurant/${req.body.restId}`);
     } catch (e) {
         res.status(e.code || 500);
@@ -74,7 +81,7 @@ app.post('/restaurant/remove', async (req, res) => {
         return;
     }
     try {
-        await restaurantManager.restaurantRemoved(req.body.id);
+        await restaurantMgr.restaurantRemoved(req.body.id);
         res.status(200);
         res.json({ message: 'success' });
     } catch (e) {
@@ -99,7 +106,7 @@ app.post('/restaurant/addTable', async (req, res) => {
         return;
     }
     try {
-        await restaurantManager.tableAdded(body.restId, body.table);
+        await restaurantMgr.tableAdded(body.restId, body.table);
         res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
     } catch (e) {
         res.status(e.code || 500);
@@ -130,7 +137,7 @@ app.post('/restaurant/removeTable', async (req, res) => {
         }
     }
     try {
-        await restaurantManager.tableRemoved(body.restId, body.table);
+        await restaurantMgr.tableRemoved(body.restId, body.table);
         res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
     } catch (e) {
         res.status(e.code || 500);
@@ -160,7 +167,7 @@ app.post('/restaurant/addTables', async (req, res) => {
         return;
     }
     try {
-        await restaurantManager.tablesAdded(req.body.restId, req.body.tables);
+        await restaurantMgr.tablesAdded(req.body.restId, req.body.tables);
         res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
     } catch (e) {
         res.status(e.code || 500);
@@ -189,7 +196,7 @@ app.post('/restaurant/removeTables', async (req, res) => {
         return;
     }
     try {
-        await restaurantManager.tablesRemoved(body.restId, body.tables);
+        await restaurantMgr.tablesRemoved(body.restId, body.tables);
         res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
     } catch (e) {
         res.status(e.code || 500);
@@ -201,4 +208,13 @@ app.post('/restaurant/removeTables', async (req, res) => {
 // - check if <table> param of post add/removeTable is number.
 // - get restaurants based on position
 
-module.exports = app;
+
+function exportFunc(reservationManager, queryManager) {
+    if (!reservationManager || !queryManager)
+        throw new Error(`Missing the following parameters:${reservationManager ? '' : ' reservationManager'}${queryManager ? '' : ' queryManager'}`);
+    reservationMgr = reservationManager;
+    queryMgr = queryManager;
+    return app;
+}
+
+module.exports = exportFunc;
