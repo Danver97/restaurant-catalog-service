@@ -209,10 +209,10 @@ app.post('/restaurant/removeTables', async (req, res) => {
 // - get restaurants based on position
 
 
-function exportFunc(reservationManager, queryManager) {
-    if (!reservationManager || !queryManager)
-        throw new Error(`Missing the following parameters:${reservationManager ? '' : ' reservationManager'}${queryManager ? '' : ' queryManager'}`);
-    reservationMgr = reservationManager;
+function exportFunc(restaurantManager, queryManager) {
+    if (!restaurantManager || !queryManager)
+        throw new Error(`Missing the following parameters:${restaurantManager ? '' : ' restaurantManager'}${queryManager ? '' : ' queryManager'}`);
+    restaurantMgr = restaurantManager;
     queryMgr = queryManager;
     return app;
 }

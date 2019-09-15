@@ -1,16 +1,45 @@
 const assert = require('assert');
 const uuid = require('uuid/v4');
 const request = require('supertest');
-const app = require('../src/app');
+const MongoClient = require('mongodb').MongoClient;
+const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
+
+const repo = require('../infrastructure/repository/repositoryManager')('testdb');
+const businessManager = require('../domain/logic/restaurantManager')(repo);
+const queryManagerFunc = require('../infrastructure/query');
+const appFunc = require('../src/app');
 const assertStrictEqual = require('../lib/utils').assertStrictEqual;
 
 const Table = require('../domain/models/table');
 const Restaurant = require('../domain/models/restaurant');
 
-const req = request(app);
-// const req = request('localhost:3000');
+
+const mongod = new MongoMemoryServer();
+let app;
+let queryMgr;
+let req;
+
+
+async function setUpMongo() {
+    const connString = await mongod.getConnectionString();
+    mongodb = new MongoClient(connString, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongodb.connect();
+    collection = mongodb.db('Reservation').collection('Reservation');
+}
+async function setUpQuery() {
+    const connString = await mongod.getConnectionString();
+    queryMgr = await queryManagerFunc(connString, 'Reservation', 'Reservation');
+}
 
 describe('Integration test', function () {
+
+    before(async () => {
+        repo.reset();
+        await setUpMongo();
+        await setUpQuery();
+        app = appFunc(businessManager, queryMgr);
+        req = request(app);
+    })
     
     it('service test', async function () {
         await req.get('/')

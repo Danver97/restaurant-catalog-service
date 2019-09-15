@@ -6,6 +6,7 @@ class Restaurant {
     constructor(restId, name, owner) {
         if (!restId || !name || !owner) throw new RestaurantError(`Invalid Restaurant constructor paramenters. ${restId} ${name} ${owner}`);
         this.id = restId;
+        // this.restId = restId;
         this.restaurantName = name;
         this.owner = owner;
         this.tables = [];
