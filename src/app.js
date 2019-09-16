@@ -11,22 +11,22 @@ let queryMgr = null;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get('/', (req, res) => {
+app.get('/restaurant-catalog-service', (req, res) => {
     res.json({
         service: 'restaurant-catalog-service',
     });
 });
 
-app.get('/nearme', async (req, res) => {
+app.get('/restaurant-catalog-service/nearme', async (req, res) => {
     const docs = await queryMgr.nearme();
     res.json(docs);
 });
 
-app.get('/restaurants', (req, res) => {
+app.get('/restaurant-catalog-service/restaurants', (req, res) => {
     res.json({ response: 'get nearby restaurants' });
 });
 
-app.get('/restaurant', async (req, res) => {
+app.get('/restaurant-catalog-service/restaurant', async (req, res) => {
     const query = req.query;
     if (!query.restId) {
         res.status(400);
@@ -43,7 +43,7 @@ app.get('/restaurant', async (req, res) => {
     }
 });
 
-app.get('/restaurant/tables', async (req, res) => {
+app.get('/restaurant-catalog-service/restaurant/tables', async (req, res) => {
     const query = req.query;
     if (!query.restId) {
         res.status(400);
@@ -59,7 +59,7 @@ app.get('/restaurant/tables', async (req, res) => {
     }
 });
 
-app.post('/restaurant/create', async (req, res) => {
+app.post('/restaurant-catalog-service/restaurant/create', async (req, res) => {
     if (!req.body.restaurantName || !req.body.owner) {
         res.status(400);
         res.json({ error: 'Missing some required parameters (name or owner).' });
@@ -74,7 +74,7 @@ app.post('/restaurant/create', async (req, res) => {
     }
 });
 
-app.post('/restaurant/remove', async (req, res) => {
+app.post('/restaurant-catalog-service/restaurant/remove', async (req, res) => {
     if (!req.body.id) {
         res.status(400);
         res.json({ error: 'Missing some required parameters (id).' });
@@ -90,7 +90,7 @@ app.post('/restaurant/remove', async (req, res) => {
     }
 });
 
-app.post('/restaurant/addTable', async (req, res) => {
+app.post('/restaurant-catalog-service/restaurant/addTable', async (req, res) => {
     const body = req.body;
     if (!req.body.restId || !req.body.table) {
         res.status(400);
@@ -114,7 +114,7 @@ app.post('/restaurant/addTable', async (req, res) => {
     }
 });
 
-app.post('/restaurant/removeTable', async (req, res) => {
+app.post('/restaurant-catalog-service/restaurant/removeTable', async (req, res) => {
     const body = req.body;
     if (!req.body.restId || !req.body.table) {
         res.status(400);
@@ -145,7 +145,7 @@ app.post('/restaurant/removeTable', async (req, res) => {
     }
 });
 
-app.post('/restaurant/addTables', async (req, res) => {
+app.post('/restaurant-catalog-service/restaurant/addTables', async (req, res) => {
     const body = req.body;
     if (!body.restId || !body.tables) {
         res.status(400);
@@ -175,7 +175,7 @@ app.post('/restaurant/addTables', async (req, res) => {
     }
 });
 
-app.post('/restaurant/removeTables', async (req, res) => {
+app.post('/restaurant-catalog-service/restaurant/removeTables', async (req, res) => {
     const body = req.body;
     if (!req.body.restId || !req.body.tables) {
         res.status(400);
