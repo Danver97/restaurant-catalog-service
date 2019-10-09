@@ -1,0 +1,115 @@
+#%RAML 1.0
+---
+title: Restaurant Catalog API
+version: v1
+baseUri: api.restaurant_catalog.com/{version}
+schemas: 
+    Table:
+        properties:
+            tableId: string
+            people: string
+    Dish:
+        properties:
+            name: string
+            img: string
+            price: number
+            description: string
+            ingridients: string[]
+    MenuSection:
+        properties:
+            name: string
+            dishes: Dish[]
+    Menu:
+        properties:
+            restId: string
+            menuSections: MenuSection[]
+    Restaurant:
+        properties:
+            restId: string
+            restaurantName: string
+            reviewScore: number
+            menu: Menu
+            # timetable
+            tables: Table[]
+            mainImg: string
+            # location: x, y
+    Reservation:
+        properties:
+            restId: string
+            resId: string
+            people: integer
+            date: datetime
+            status: string
+            table?: Table
+
+/restaurant:
+    get:
+        description: Get a restaurant information by giving the restaurant id
+        headers: 
+        queryParameters:
+            restId: 
+                description: Specify the restaurant id of the restaurant required
+                required: true
+                type: string
+                example: 0553dec2-8e58-4639-ae0c-620e9022b3c6
+        responses: 
+            200:
+                body:
+                    application/json:
+                        type: Restaurant
+            400:
+                body:
+                    application/json:
+    post:
+        description: Creates a new restaurant
+        headers: 
+        body: 
+        responses: 
+            200:
+                body:
+                    application/json:
+            400:
+                body:
+                    application/json:
+
+/reservation:
+    post:
+        description: Creates a new reservation
+        headers: 
+        body: 
+            application/json:
+                properties:
+                    restId: string
+                    people: integer
+                    date: datetime
+                    # userId MUST be added
+                    # userId: string
+        responses: 
+            200:
+                body:
+                    application/json:
+            400:
+                body:
+                    application/json:
+
+/reservations:
+    get:
+        description: Get reservations of an user if userId is specified or the reservations of a restaurant if restId is specified
+        headers: 
+        queryParameters:
+                userId:
+                    description: Specify the user id of which it's getting the reservations
+                    required: false
+                    type: string
+                    example: 0553dec2-8e58-4639-ae0c-620e9022b3c6
+                restId:
+                    description: Specify the restaurant id of which it's getting the reservations
+                    required: false
+                    type: string
+                    example: 0553dec2-8e58-4639-ae0c-620e9022b3c6                
+        responses: 
+            200:
+                body:
+                    application/json:
+                        type: Reservation[]
+
