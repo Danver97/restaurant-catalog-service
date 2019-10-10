@@ -23,13 +23,30 @@ schemas:
         properties:
             restId: string
             menuSections: MenuSection[]
+    OpeningInterval:
+        properties:
+            opening:
+                properties:
+                    h: integer
+                    m: integer
+            closing:
+                properties:
+                    h: integer
+                    m: integer
+    DayTimetable:
+        properties:
+            dayIndex: integer
+            openingIntevals: OpeningInterval[]
+    Timetable:
+        type: DayTimetable[]
+        maxItems: 7
     Restaurant:
         properties:
             restId: string
             restaurantName: string
             reviewScore: number
             menu: Menu
-            # timetable
+            timetable: Timetable
             tables: Table[]
             mainImg: string
             # location: x, y
