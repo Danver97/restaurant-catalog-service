@@ -17,6 +17,7 @@ schemas:
             ingredients: string[]
     MenuSection:
         properties:
+            sortIndex: integer
             name: string
             dishes: Dish[]
     Menu:
@@ -40,6 +41,10 @@ schemas:
     Timetable:
         type: DayTimetable[]
         maxItems: 7
+    Review:
+        properties:
+            score: integer
+            reviewCount: integer
     Restaurant:
         properties:
             restId: string
