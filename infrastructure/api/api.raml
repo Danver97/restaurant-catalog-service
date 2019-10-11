@@ -7,7 +7,7 @@ schemas:
     Table:
         properties:
             tableId: string
-            people: string
+            people: integer
     Dish:
         properties:
             name: string
@@ -15,6 +15,7 @@ schemas:
             price: number
             description: string
             ingredients: string[]
+            #dish_type: string ->da definire la collection (vegetariano, ecc...)
     MenuSection:
         properties:
             name: string
@@ -49,15 +50,9 @@ schemas:
             timetable: Timetable
             tables: Table[]
             mainImg: string
+            images: string[]
             # location: x, y
-    Reservation:
-        properties:
-            restId: string
-            resId: string
-            people: integer
-            date: datetime
-            status: string
-            table?: Table
+            # recensioni: da definire
 
 /restaurant:
     get:
@@ -74,59 +69,187 @@ schemas:
                 body:
                     application/json:
                         type: Restaurant
+                        message: String
             400:
                 body:
                     application/json:
+                        message: String
     post:
         description: Creates a new restaurant
         headers: 
         body: 
-        responses: 
-            200:
-                body:
-                    application/json:
-            400:
-                body:
-                    application/json:
-
-/reservation:
-    post:
-        description: Creates a new reservation
-        headers: 
-        body: 
             application/json:
                 properties:
-                    restId: string
-                    people: integer
-                    date: datetime
-                    # userId MUST be added
-                    # userId: string
+                    restaurant: Restaurant
         responses: 
             200:
                 body:
                     application/json:
+                     message: String
             400:
                 body:
                     application/json:
+                     message: String
+    /dish:
+        post:
+            description: Add a new dish to an MenuSection
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId:String
+                        menuSectionName: String
+                        dish: Dish
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
+        delete:
+            description: Remove a dish from MenuSection
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId:String
+                        menuSectionName: String
+                        dish: string
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
 
-/reservations:
-    get:
-        description: Get reservations of an user if userId is specified or the reservations of a restaurant if restId is specified
-        headers: 
-        queryParameters:
-                userId:
-                    description: Specify the user id of which it's getting the reservations
-                    required: false
-                    type: string
-                    example: 0553dec2-8e58-4639-ae0c-620e9022b3c6
-                restId:
-                    description: Specify the restaurant id of which it's getting the reservations
-                    required: false
-                    type: string
-                    example: 0553dec2-8e58-4639-ae0c-620e9022b3c6                
-        responses: 
-            200:
-                body:
-                    application/json:
-                        type: Reservation[]
+    /menusection:
+        post:
+            description: Add a new menu section
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId:String
+                        menuSections: MenuSection
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
+        delete:
+            description: Remove a menu section
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId:String
+                        menuSections: string
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
 
+    /images:
+        post:
+            description: Add new Images to Restaurant
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId: String
+                        images: String[]
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
+        delete:
+            description: Remove  Images from Restaurant
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId: String
+                        images: String[]
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
+    /table:
+        post:
+            description: Add new table to Restaurant
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId: String
+                        table: Table
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
+        delete:
+            description: Remove table from Restaurant
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId: String
+                        tableId: String
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
+    /timetable:
+        post:
+            description: Set open-time Restaurant
+            headers: 
+            body: 
+                application/json:
+                    properties:
+                        restId: String
+                        timetable: Timetable
+            responses: 
+                200:
+                    body:
+                        application/json:
+                        message: String
+                400:
+                    body:
+                        application/json:
+                        message: String
+    
