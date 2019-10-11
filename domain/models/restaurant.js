@@ -3,7 +3,7 @@ const Table = require('./table');
 const checker = require('../../lib/checkers');
 
 class Restaurant {
-    constructor(restId, name, owner) {
+    constructor(restId, name, owner,re) {
         if (!restId || !name || !owner) throw new RestaurantError(`Invalid Restaurant constructor paramenters. ${restId} ${name} ${owner}`);
         this.id = restId;
         // this.restId = restId;
