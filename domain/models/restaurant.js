@@ -10,7 +10,16 @@ class Restaurant {
         if (!restId || !name || !owner || !timetable || !menu || !telephone)
             throw new RestaurantError(`Missing the following constructor params:
             ${restId ? '' : 'restId'}${name ? '' : ' name'}${owner ? '' : ' owner'}${timetable ? '' : ' timetable'}${menu ? '' : ' menu'}${telephone ? '' : ' telephone'}`);
-        
+        if(!(timetable instanceof Timetable))
+            throw new RestaurantError(`The time is not formatted in the right way`);
+        if(!(menu instanceof menu))
+            throw new RestaurantError(`The menu is not formatted in the right way`);
+        if(!(/^+[0-9]?()[0-9](\s|\S)(\d[0-9]{9})$/.test(telephone)))
+            throw new RestaurantError(`The telephone is not formatted in the right way`);
+        if(!(owner instanceof String))
+            throw new RestaurantError(`The owner value is not formatted in the right way`);
+        if(!(name instanceof String))
+            throw new RestaurantError(`The name value is not formatted in the right way`);
         this.restId = restId;
         this.restaurantName = name;
         this.owner = owner;

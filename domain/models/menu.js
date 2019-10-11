@@ -113,6 +113,17 @@ class MenuSection {
         this.dishes.push(dish);
         this.dishNameSet.add(dish.name);
     }
+
+    removeDish(dish) {
+        if (!dish)
+            throw new Error('Missing the following param: dish');
+        if (!(dish instanceof Dish))
+            throw new Error('dish param must be an instace of Dish');
+        if (!this.dishNameSet.has(dish.name))
+            throw new Error(`Dish with name ${d.name} is not present in the section`);
+        this.dishes.delete(dish);
+        this.dishNameSet.delete(dish.name);
+    }
 }
 
 class Dish {
