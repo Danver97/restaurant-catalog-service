@@ -50,13 +50,15 @@ schemas:
         properties:
             restId: string
             restaurantName: string
-            owner: String
-            reviewScore: number
+            review: Review
             menu: Menu
             timetable: Timetable
             tables: Table[]
             mainImg: string
             images: string[]
+            telephone:
+                type: string
+                pattern: ^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{9})$
             # location: x, y
             # recensioni: da definire
 

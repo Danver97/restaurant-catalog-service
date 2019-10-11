@@ -1,10 +1,14 @@
 const RestaurantError = require('../errors/restaurant_error');
 const Table = require('./table');
+const Review = require('./review');
+const Timetable = require('./timetable').Timetable;
+const Menu = require('./timetable').Menu;
 const checker = require('../../lib/checkers');
 
 class Restaurant {
-    constructor(restId, name, owner,re) {
-        if (!restId || !name || !owner) throw new RestaurantError(`Invalid Restaurant constructor paramenters. ${restId} ${name} ${owner}`);
+    constructor(restId, name, owner) {
+        if (!restId || !name || !owner)
+            throw new RestaurantError(`Invalid Restaurant constructor paramenters. ${restId} ${name} ${owner}`);
         this.id = restId;
         // this.restId = restId;
         this.restaurantName = name;
@@ -24,8 +28,9 @@ class Restaurant {
         return rest;
     }
 
-    addSchedule(schedule) {
-        if (!schedule) throw new RestaurantError('Invalid schedule parameter.');
+    setTimetable(timetable) {
+        if (!timetable) throw new RestaurantError('Missing the following parameter: timetable');
+        if (!(timetable instanceof Timetable)) throw new RestaurantError('timetable');
         this.schedule = schedule;
     }
 

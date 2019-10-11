@@ -112,7 +112,6 @@ class RestaurantManager {
         });
         // return tables;
     }
-    // rcl
     
     getTables(restId, cb) {
         const dbmanager = this.db;
