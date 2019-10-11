@@ -6,13 +6,17 @@ const Menu = require('./timetable').Menu;
 const checker = require('../../lib/checkers');
 
 class Restaurant {
-    constructor(restId, name, owner) {
-        if (!restId || !name || !owner)
-            throw new RestaurantError(`Invalid Restaurant constructor paramenters. ${restId} ${name} ${owner}`);
-        this.id = restId;
-        // this.restId = restId;
+    constructor(restId, name, owner, timetable, menu, telephone) {
+        if (!restId || !name || !owner || !timetable || !menu || !telephone)
+            throw new RestaurantError(`Missing the following constructor params:
+            ${restId ? '' : 'restId'}${name ? '' : ' name'}${owner ? '' : ' owner'}${timetable ? '' : ' timetable'}${menu ? '' : ' menu'}${telephone ? '' : ' telephone'}`);
+        
+        this.restId = restId;
         this.restaurantName = name;
         this.owner = owner;
+        this.timetable = timetable;
+        this.menu = menu;
+        this.telephone = telephone;
         this.tables = [];
     }
 
