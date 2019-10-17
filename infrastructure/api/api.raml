@@ -8,11 +8,15 @@ schemas:
         properties:
             tableId: string
             people: integer
+    Price:
+        properties:
+            value: number
+            currency: string
     Dish:
         properties:
             name: string
             img: string
-            price: number
+            price: Price
             description: string
             ingredients: string[]
             #dish_type: string ->da definire la collection (vegetariano, ecc...)
