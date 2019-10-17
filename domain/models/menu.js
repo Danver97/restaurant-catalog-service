@@ -130,6 +130,8 @@ class Dish {
     constructor(name, price, description, ingredients) {
         if (!name || !price)
             throw new Error(`Missing the following constructor params:${name ? '' : ' name'}${price ? '' : ' price'}`);
+        if (!(price instanceof Price))
+            throw new Error('price param must be instance of Price');
         if (ingredients && (!Array.isArray(ingredients) || (ingredients.length > 0 && typeof ingredients[0] !== 'string')))
             throw new Error('ingredients must be an array of string');
         if (description && typeof description !== 'string')
@@ -147,8 +149,34 @@ class Dish {
     }
 }
 
+class Price {
+    constructor(value, currency) {
+        if (!value || !currency)
+            throw new Error(`Missing the following constructor params:${value ? '' : ' value'}${currency ? '' : ' currency'}`);
+        if (typeof value !== 'number')
+            throw new Error('value param must be a number');
+        if (typeof currency !== 'string')
+            throw new Error('currency param must be a string');
+        if (!/[A-Z]{3}/.test(currency))
+            throw new Error('currency param must be a valid ISO 4217 currency code');
+        this.value = value;
+        this.currency = currency;
+    }
+    
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        return new Price(obj.value, obj.currency);
+    }
+
+    toString(locale) {
+        return new Intl.NumberFormat(locale, { style: 'currency', currency: this.currency }).format(this.value);
+    }
+}
+
 module.exports = {
     Menu,
     MenuSection,
     Dish,
+    Price,
 };

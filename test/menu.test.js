@@ -4,11 +4,43 @@ const menuModule = require('../domain/models/menu');
 const Menu = menuModule.Menu;
 const MenuSection = menuModule.MenuSection;
 const Dish = menuModule.Dish;
+const Price = menuModule.Price;
 
 describe('Menu module unit test', () => {
+
+    context('Price class test', () => {
+
+        it('check constructor works', () => {
+            assert.throws(() => new Price());
+            assert.throws(() => new Price('a'));
+            assert.throws(() => new Price(15));
+            assert.throws(() => new Price(15, 'eur'));
+            const p = new Price(15, 'EUR');
+            assert.strictEqual(p.value, 15);
+            assert.strictEqual(p.currency, 'EUR');
+        });
+
+        it('check fromObject works', () => {
+            assert.throws(() => Price.fromObject());
+            const p = Price.fromObject({ value: 15, currency: 'EUR' });
+            assert.strictEqual(p.value, 15);
+            assert.strictEqual(p.currency, 'EUR');
+        });
+
+        it('check toString works', () => {
+            const p = new Price(15.5, 'EUR');
+            const space = String.fromCharCode(160)
+            assert.strictEqual(p.toString('en-GB').replace(space, ' '), '€15.50');
+            assert.strictEqual(p.toString('it-IT').replace(space, ' '), '€ 15.50');
+            const p2 = new Price(15.5, 'GBP');
+            assert.strictEqual(p2.toString('en-GB').replace(space, ' '), '£15.50');
+            assert.strictEqual(p2.toString('it-IT').replace(space, ' '), '£ 15.50');
+        });
+    });
+
     context('Dish class test', () => {
         const name = 'AA';
-        const price = 7.89;
+        const price = new Price(7.89, 'EUR');
         const ingredients = ['banana', 'strawberry'];
         const description = 'A mix of fruits';
 
@@ -38,9 +70,9 @@ describe('Menu module unit test', () => {
     });
     
     context('MenuSection class test', () => {
-        const d1 = new Dish('Fruit Mix', 7.99, 'A fruit mix', ['banana', 'strawberry']);
-        const d2 = new Dish('Another Fruit Mix', 9.99, 'Another fruit mix', ['banana', 'passion fruit']);
-        const d3 = new Dish('Fruit Mix 3', 9.99, 'Another fruit mix', ['banana', 'passion fruit']);
+        const d1 = new Dish('Fruit Mix', new Price(7.99, 'EUR'), 'A fruit mix', ['banana', 'strawberry']);
+        const d2 = new Dish('Another Fruit Mix', new Price(9.99, 'EUR'), 'Another fruit mix', ['banana', 'passion fruit']);
+        const d3 = new Dish('Fruit Mix 3', new Price(9.99, 'EUR'), 'Another fruit mix', ['banana', 'passion fruit']);
 
         it('check constructor works', () => {
             assert.throws(() => new MenuSection(), Error);
@@ -94,9 +126,9 @@ describe('Menu module unit test', () => {
     });
 
     context('Menu class test', () => {
-        const d1 = new Dish('Fruit Mix', 7.99, 'A fruit mix', ['banana', 'strawberry']);
-        const d2 = new Dish('Another Fruit Mix', 9.99, 'Another fruit mix', ['banana', 'passion fruit']);
-        const d3 = new Dish('Fruit Mix 3', 9.99, 'Another fruit mix', ['banana', 'passion fruit']);
+        const d1 = new Dish('Fruit Mix', new Price(7.99, 'EUR'), 'A fruit mix', ['banana', 'strawberry']);
+        const d2 = new Dish('Another Fruit Mix', new Price(9.99, 'EUR'), 'Another fruit mix', ['banana', 'passion fruit']);
+        const d3 = new Dish('Fruit Mix 3', new Price(9.99, 'EUR'), 'Another fruit mix', ['banana', 'passion fruit']);
         const section1 = new MenuSection(1, 'Antipasti', [d1, d3]);
         const section2 = new MenuSection(2, 'Primi', [d2]);
         const section3 = new MenuSection(2, 'Antipasti');
