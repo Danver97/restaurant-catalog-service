@@ -1,5 +1,5 @@
 const assert = require('assert');
-const timetableModule = require('../domain/models/timetable');
+const timetableModule = require('../../domain/models/timetable');
 
 const Timetable = timetableModule.Timetable;
 const DayTimetable = timetableModule.DayTimetable;

@@ -1,14 +1,15 @@
 const assert = require('assert');
-const Table = require('../domain/models/table');
-const Restaurant = require('../domain/models/restaurant');
-const RestaurantError = require('../domain/errors/restaurant_error');
+const lib = require('./lib/restaurant-test.lib');
+const Table = require('../../domain/models/table');
+const Restaurant = require('../../domain/models/restaurant');
+const RestaurantError = require('../../domain/errors/restaurant_error');
 
 describe('Restaurant class unit test', function () {
     const name = 'Tavola dei quattro venti';
     const owner = 'Luca';
-    const rest = new Restaurant(1, name, owner);
+    const rest = new Restaurant(1, name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
     it('check if Restaurant is created with the right attributes', function () {
-        assert.strictEqual(rest.id, 1);
+        assert.strictEqual(rest.restId, 1);
         assert.strictEqual(rest.restaurantName, 'Tavola dei quattro venti');
         assert.strictEqual(rest.owner, 'Luca');
     });
@@ -16,18 +17,18 @@ describe('Restaurant class unit test', function () {
         assert.throws(() => new Restaurant(1, 'a'), RestaurantError);
     });
     it('check if addTable() works properly', function () {
-        assert.strictEqual(JSON.stringify(rest.addTable(new Table(1, rest.id, 4))),
-            JSON.stringify([{ id: 1, restaurantId: rest.id, people: 4 }]));
-        assert.strictEqual(JSON.stringify(rest.addTable(new Table(1, rest.id, 4))),
+        assert.strictEqual(JSON.stringify(rest.addTable(new Table(1, rest.restId, 4))),
+            JSON.stringify([{ id: 1, restaurantId: rest.restId, people: 4 }]));
+        assert.strictEqual(JSON.stringify(rest.addTable(new Table(1, rest.restId, 4))),
             JSON.stringify(null));
         assert.throws(() => rest.addTable(), RestaurantError);
         assert.throws(() => rest.addTable({}), RestaurantError);
     });
     it('check if removeTable() works properly', function () {
-        rest.addTable(new Table(2, rest.id, 4));
+        rest.addTable(new Table(2, rest.restId, 4));
         assert.strictEqual(JSON.stringify(rest.removeTable(2)),
-            JSON.stringify([{ id: 1, restaurantId: rest.id, people: 4 }]));
-        assert.strictEqual(JSON.stringify(rest.removeTable(new Table(1, rest.id, 4))),
+            JSON.stringify([{ id: 1, restaurantId: rest.restId, people: 4 }]));
+        assert.strictEqual(JSON.stringify(rest.removeTable(new Table(1, rest.restId, 4))),
             JSON.stringify([]));
         assert.throws(() => rest.removeTable(), RestaurantError);
         assert.throws(() => rest.removeTable({}), RestaurantError);
@@ -38,14 +39,14 @@ describe('Restaurant class unit test', function () {
         assert.strictEqual(JSON.stringify(rest.addTables([])),
             JSON.stringify(null));
         assert.strictEqual(
-            JSON.stringify(rest.addTables([new Table(1, rest.id, 4), new Table(2, rest.id, 4)])),
+            JSON.stringify(rest.addTables([new Table(1, rest.restId, 4), new Table(2, rest.restId, 4)])),
             JSON.stringify([{
                 id: 1,
-                restaurantId: rest.id,
+                restaurantId: rest.restId,
                 people: 4,
             }, {
                 id: 2,
-                restaurantId: rest.id,
+                restaurantId: rest.restId,
                 people: 4,
             }]),
         );
@@ -55,8 +56,8 @@ describe('Restaurant class unit test', function () {
         assert.throws(() => rest.removeTables([{}]), RestaurantError);
         assert.strictEqual(JSON.stringify(rest.removeTables([])),
             JSON.stringify(null));
-        assert.strictEqual(JSON.stringify(rest.removeTables([new Table(2, rest.id, 4)])),
-            JSON.stringify([{ id: 1, restaurantId: rest.id, people: 4 }]));
+        assert.strictEqual(JSON.stringify(rest.removeTables([new Table(2, rest.restId, 4)])),
+            JSON.stringify([{ id: 1, restaurantId: rest.restId, people: 4 }]));
         assert.strictEqual(JSON.stringify(rest.removeTables([1])),
             JSON.stringify([]));
     });

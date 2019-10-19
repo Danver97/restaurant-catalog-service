@@ -1,10 +1,11 @@
 const assert = require('assert');
-const ENV = require('../src/env');
+const ENV = require('../../src/env');
 
-const Table = require('../domain/models/table');
-const Restaurant = require('../domain/models/restaurant');
-const db = require('../infrastructure/repository/repositoryManager')('testdb');
-const restMgr = require('../domain/logic/restaurantManager')(db);
+const Table = require('../../domain/models/table');
+const Restaurant = require('../../domain/models/restaurant');
+const lib = require('./lib/restaurant-test.lib');
+const db = require('../../infrastructure/repository/repositoryManager')('testdb');
+const restMgr = require('../../domain/logic/restaurantManager')(db);
 
 function wait(ms) {
     const start = Date.now();
@@ -19,7 +20,7 @@ const waitAsyncTimeout = 10;
 describe('Restaurant Manager unit test', function () {
     const name = 'I Quattro Cantoni';
     const owner = 'Gincarlo';
-    const rest = new Restaurant(18, name, owner);
+    const rest = new Restaurant(18, name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
     const equals = (actual, exprected) => {
         assert.strictEqual(actual.id, exprected.id);
         assert.strictEqual(actual.restaurantName, exprected.restaurantName);

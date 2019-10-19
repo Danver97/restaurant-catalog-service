@@ -1,5 +1,5 @@
 const assert = require('assert');
-const Table = require('../domain/models/table');
+const Table = require('../../domain/models/table');
 
 describe('Table class unit test', function () {
     const table = new Table(1, 1, 4);

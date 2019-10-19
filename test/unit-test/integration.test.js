@@ -4,14 +4,15 @@ const request = require('supertest');
 const MongoClient = require('mongodb').MongoClient;
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
 
-const repo = require('../infrastructure/repository/repositoryManager')('testdb');
-const businessManager = require('../domain/logic/restaurantManager')(repo);
-const queryManagerFunc = require('../infrastructure/query');
-const appFunc = require('../src/app');
-const assertStrictEqual = require('../lib/utils').assertStrictEqual;
+const repo = require('../../infrastructure/repository/repositoryManager')('testdb');
+const businessManager = require('../../domain/logic/restaurantManager')(repo);
+const queryManagerFunc = require('../../infrastructure/query');
+const appFunc = require('../../src/app');
+const assertStrictEqual = require('../../lib/utils').assertStrictEqual;
 
-const Table = require('../domain/models/table');
-const Restaurant = require('../domain/models/restaurant');
+const Table = require('../../domain/models/table');
+const Restaurant = require('../../domain/models/restaurant');
+const lib = require('./lib/restaurant-test.lib');
 
 
 const mongod = new MongoMemoryServer();
@@ -51,7 +52,7 @@ describe('Integration test', function () {
     context('Create and destroy restaurant', function () {
         const name = 'I quattro cantoni';
         const owner = 'Giacomo';
-        const rest = new Restaurant(uuid(), name, owner);
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
         
         it('post /restaurant-catalog-service/restaurant/create', async function () {
             await req.post('/restaurant-catalog-service/restaurant/create')
@@ -93,7 +94,7 @@ describe('Integration test', function () {
     context('Add and remove tables from restaurant', function () {
         const name = 'I quattro cantoni';
         const owner = 'Giacomo';
-        const rest = new Restaurant(uuid(), name, owner);
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
         
         it('post /restaurant-catalog-service/restaurant/create', async function () {
             await req.post('/restaurant-catalog-service/restaurant/create')

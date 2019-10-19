@@ -1,8 +1,9 @@
 const RestaurantError = require('../errors/restaurant_error');
 const Table = require('./table');
+const Phone = require('./phone');
 const Review = require('./review');
 const Timetable = require('./timetable').Timetable;
-const Menu = require('./timetable').Menu;
+const Menu = require('./menu').Menu;
 const checker = require('../../lib/checkers');
 
 class Restaurant {
@@ -10,15 +11,15 @@ class Restaurant {
         if (!restId || !name || !owner || !timetable || !menu || !telephone)
             throw new RestaurantError(`Missing the following constructor params:
             ${restId ? '' : 'restId'}${name ? '' : ' name'}${owner ? '' : ' owner'}${timetable ? '' : ' timetable'}${menu ? '' : ' menu'}${telephone ? '' : ' telephone'}`);
-        if(!(timetable instanceof Timetable))
+        if (!(timetable instanceof Timetable))
             throw new RestaurantError(`The time is not formatted in the right way`);
-        if(!(menu instanceof menu))
+        if (!(menu instanceof Menu))
             throw new RestaurantError(`The menu is not formatted in the right way`);
-        if(!(/^+[0-9]?()[0-9](\s|\S)(\d[0-9]{9})$/.test(telephone)))
-            throw new RestaurantError(`The telephone is not formatted in the right way`);
-        if(!(owner instanceof String))
+        if (!(telephone instanceof Phone)) // TODO: internationalize
+            throw new RestaurantError(`telephone is not an instance of Phone`);
+        if (typeof owner !== 'string')
             throw new RestaurantError(`The owner value is not formatted in the right way`);
-        if(!(name instanceof String))
+        if (typeof name !== 'string')
             throw new RestaurantError(`The name value is not formatted in the right way`);
         this.restId = restId;
         this.restaurantName = name;
@@ -30,10 +31,13 @@ class Restaurant {
     }
 
     static fromObject(obj) {
-        const rest = new Restaurant(obj.id, obj.restaurantName, obj.owner);
+        const timetable = Timetable.fromObject(obj.timetable);
+        const menu = Menu.fromObject(obj.menu);
+        const telephone = new Phone(obj.telephone);
+        const rest = new Restaurant(obj.restId, obj.restaurantName, obj.owner, timetable, menu, telephone);
         if (obj.tables)
             rest.addTables(obj.tables.map(t => Table.fromObject(t)));
-        const classKeys = ['id', 'restaurantName', 'owner', 'tables'];
+        const classKeys = ['restId', 'restaurantName', 'owner', 'tables'];
         Object.keys(obj).forEach(k => {
             if (!classKeys.includes(k))
                 rest[k] = obj[k];

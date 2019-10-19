@@ -1,5 +1,5 @@
 const assert = require('assert');
-const menuModule = require('../domain/models/menu');
+const menuModule = require('../../domain/models/menu');
 
 const Menu = menuModule.Menu;
 const MenuSection = menuModule.MenuSection;

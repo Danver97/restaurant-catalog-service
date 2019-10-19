@@ -14,35 +14,36 @@ async function saveEvent(db, streamId, eventId, message, payload) {
 
 function restaurantCreated(rest, cb) {
     return Promisify(async () => {
-        const e = await this.save(rest.id, rest._revisionId, restaurantEvents.restaurantCreated, Object.assign({}, rest));
+        const payload = Object.assign({}, rest);
+        const e = await this.save(rest.restId, rest._revisionId, restaurantEvents.restaurantCreated, Object.assign({}, rest));
         if (rest._revisionId) rest._revisionId++;
         return e;
     }, cb);
-    // return this.save(rest.id, rest._revisionId, restaurantEvents.restaurantCreated, Object.assign({}, rest), cb);
+    // return this.save(rest.restId, rest._revisionId, restaurantEvents.restaurantCreated, Object.assign({}, rest), cb);
 }
 
 function restaurantRemoved(rest, cb) {
     return Promisify(async () => {
-        await this.save(rest.id, rest._revisionId, restaurantEvents.restaurantRemoved, { id: rest.id, status: 'removed' });
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.restaurantRemoved, { id: rest.restId, status: 'removed' });
         if (rest._revisionId) rest._revisionId++;
     }, cb);
-    // return this.save(rest.id, rest._revisionId, restaurantEvents.restaurantRemoved, { id: rest.id }, cb);
+    // return this.save(rest.restId, rest._revisionId, restaurantEvents.restaurantRemoved, { id: rest.restId }, cb);
 }
 
 function tableAdded(rest, tables, cb) {
     return Promisify(async () => {
-        await this.save(rest.id, rest._revisionId, restaurantEvents.tableAdded, { id: rest.id, tables: tables.slice() });
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.tableAdded, { id: rest.restId, tables: tables.slice() });
         if (rest._revisionId) rest._revisionId++;
     }, cb);
-    // return this.save(rest.id, rest._revisionId, restaurantEvents.tableAdded, { id: rest.id, tables: tables.slice() }, cb);
+    // return this.save(rest.restId, rest._revisionId, restaurantEvents.tableAdded, { id: rest.restId, tables: tables.slice() }, cb);
 }
 
 function tableRemoved(rest, tables, cb) {
     return Promisify(async () => {
-        await this.save(rest.id, rest._revisionId, restaurantEvents.tableRemoved, { id: rest.id, tables: tables.slice() });
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.tableRemoved, { id: rest.restId, tables: tables.slice() });
         if (rest._revisionId) rest._revisionId++;
     }, cb);
-    // return this.save(rest.id, rest._revisionId, restaurantEvents.tableRemoved, { id: rest.id, tables: tables.slice() }, cb);
+    // return this.save(rest.restId, rest._revisionId, restaurantEvents.tableRemoved, { id: rest.restId, tables: tables.slice() }, cb);
 }
 
 function getRestaurant(restId, cb) {

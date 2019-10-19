@@ -9,6 +9,15 @@ class Menu {
         this.sectionNameSet = this._computeSectionNameSet(this.menuSections);
     }
 
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        Object.keys(obj).forEach(k => {
+            obj[k] = MenuSection.fromObject(obj[k]);
+        });
+        return new Menu(obj.menuSections);
+    }
+
     _computeSectionNameSet(menuSections) {
         const sectionNameSet = new Set();
         menuSections.forEach(s => {
@@ -51,6 +60,10 @@ class Menu {
     _sortMenuSections() {
         this.menuSections.sort((a, b) => a.compareTo(b));
     }
+
+    toJSON() {
+        return this.menuSections;
+    }
 }
 
 class MenuSection {
@@ -70,6 +83,13 @@ class MenuSection {
         this.name = name;
 
         this.dishNameSet = this._computeDishNameSet(this.dishes);
+    }
+
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        obj.dishes = obj.dishes.map(d => Dish.fromObject(d));
+        return new MenuSection(obj.sortIndex, obj.name, obj.dishes);
     }
 
     _computeDishNameSet(dishes) {
@@ -143,6 +163,13 @@ class Dish {
         this.description = description || '';
         this.ingredients = ingredients || [];
         this.image = image;
+    }
+
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        const price = Price.fromObject(obj.price);
+        return new Dish(obj.name, price, obj.description, obj.ingredients, obj.image);
     }
 
     compareTo(obj) {

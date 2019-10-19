@@ -3,6 +3,17 @@ class Timetable {
         this.days = {};
     }
 
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        Object.keys(obj).forEach(k => {
+            obj[k] = DayTimetable.fromObject(obj[k]);
+        });
+        const timetable = new Timetable();
+        timetable.setDays(obj);
+        return timetable;
+    }
+
     setDays(days) {
         if (!days)
             throw new Error(`Missing the following params: days`);
@@ -29,6 +40,10 @@ class Timetable {
         if (typeof dayIndex !== 'number')
             throw new Error(`dayIndex must be a number`);
         return this.days[dayIndex];
+    }
+
+    toJSON() {
+        return this.days;
     }
 }
 
@@ -63,6 +78,10 @@ class DayOfWeek {
     static get SUNDAY() {
         return new DayOfWeek(7);
     }
+    
+    toJSON() {
+        return this.dayIndex;
+    }
 }
 
 class DayTimetable {
@@ -78,6 +97,14 @@ class DayTimetable {
         } else
             this.openings = [];
         this.dayOfWeek = dayOfWeek;
+    }
+
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        const dayOfWeek = new DayOfWeek(obj.dayOfWeek);
+        const openings = obj.openings.map(o => OpeningInteval.fromObject(o));
+        return new DayTimetable(dayOfWeek, openings);
     }
 
     setOpenings(openings) {
@@ -110,6 +137,14 @@ class OpeningInteval {
         this.opening = opening;
         this.closing = closing;
     }
+    
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        const opening = OpeningHour.fromObject(obj.opening);
+        const closing = OpeningHour.fromObject(obj.closing);
+        return new OpeningInteval(opening, closing);
+    }
 }
 
 class OpeningHour {
@@ -118,6 +153,12 @@ class OpeningHour {
             throw new Error(`Missing the following constructor parameters:${h ? '' : ' h'}${m ? '' : ' m'}`);
         this.h = h;
         this.m = m;
+    }
+
+    static fromObject(obj) {
+        if (!obj)
+            throw new Error('Missing obj parameter');
+        return new OpeningHour(obj.h, obj.m);
     }
 
     setHours(newH) {
