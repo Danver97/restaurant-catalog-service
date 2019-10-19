@@ -1,10 +1,5 @@
 const uuid = require('uuid/v4');
 const Restaurant = require('../models/restaurant');
-const timetableLib = require('../models/timetable');
-const Timetable = timetableLib.Timetable;
-const DayTimetable = timetableLib.DayTimetable;
-const Menu = require('../models/menu').Menu;
-const Phone = require('../models/phone');
 const checker = require('../../lib/checkers');
 
 class RestaurantManager {
@@ -16,13 +11,7 @@ class RestaurantManager {
         const dbmanager = this.db;
         return new Promise(async (resolve, reject) => {
             try {
-                const menu = Menu.fromObject(res.menu);
-                const telephone = new Phone(res.telephone);
-                const timetable = new Timetable();
-                res.timetable.forEach(dt => {
-                    timetable.setDay(DayTimetable.fromObject(dt));
-                });
-                const rest = new Restaurant(res.restId || uuid(), res.restaurantName, res.owner, timetable, menu, telephone);
+                const rest = new Restaurant(res.restId || uuid(), res.restaurantName, res.owner, res.timetable, res.menu, res.telephone);
                 await dbmanager.restaurantCreated(rest, cb);
                 resolve(rest);
             } catch (e) {

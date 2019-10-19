@@ -3,6 +3,11 @@ const bodyParser = require('body-parser');
 /*const repositoryManager = require('../infrastructure/repository/repositoryManager')();
 const restaurantManager = require('../domain/logic/restaurantManager')(repositoryManager);*/
 const Table = require('../domain/models/table');
+const timetableLib = require('../domain/models/timetable');
+const Timetable = timetableLib.Timetable;
+const DayTimetable = timetableLib.DayTimetable;
+const Menu = require('../domain/models/menu').Menu;
+const Phone = require('../domain/models/phone');
 
 const app = express();
 let restaurantMgr = null;
@@ -72,6 +77,13 @@ app.post('/restaurant-catalog-service/restaurant/create', async (req, res) => {
         return;
     }
     try {
+        body.menu = Menu.fromObject(body.menu);
+        body.telephone = new Phone(body.telephone);
+        const timetable = new Timetable();
+        body.timetable.forEach(dt => {
+            timetable.setDay(DayTimetable.fromObject(dt));
+        });
+        body.timetable = timetable;
         const rest = await restaurantMgr.restaurantCreated(req.body);
         res.status(200);
         res.json({ restId: rest.restId });
