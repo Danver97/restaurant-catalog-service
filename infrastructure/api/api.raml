@@ -72,25 +72,7 @@ schemas:
             # location: x, y
             # recensioni: da definire
 
-/restaurant:
-    get:
-        description: Get a restaurant information by giving the restaurant id
-        headers: 
-        queryParameters:
-            restId: 
-                description: Specify the restaurant id of the restaurant required
-                required: true
-                type: string
-                example: 0553dec2-8e58-4639-ae0c-620e9022b3c6
-        responses: 
-            200:
-                body:
-                    application/json:
-                        type: Restaurant
-            400:
-                body:
-                    application/json:
-                        type: Error
+/restaurants:
     post:
         description: Creates a new restaurant
         headers: 
@@ -106,157 +88,181 @@ schemas:
                 body:
                     application/json:
                         type: Error
-    /dish:
-        post:
-            description: Add a new dish to an MenuSection
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        menuSectionName: string
-                        dish: Dish
+    /{restId}: 
+        get:
+            description: Get a restaurant information by giving the restaurant id
+            headers:
             responses: 
                 200:
                     body:
                         application/json:
+                            type: Restaurant
                 400:
                     body:
                         application/json:
                             type: Error
-        delete:
-            description: Remove a dish from MenuSection
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        menuSectionName: string
-                        dish: string
-            responses: 
+        /menu:
+            get:
+                description: Get the restaurant menu
+                headers:
+                responses: 
                 200:
                     body:
                         application/json:
+                            type: Menu
                 400:
                     body:
                         application/json:
                             type: Error
+            /menuSections:
+                post:
+                    description: Add a new menu section
+                    headers: 
+                    body: 
+                        application/json:
+                            properties:
+                                restId: UUID
+                                menuSections: MenuSection
+                    responses: 
+                        200:
+                            body:
+                                application/json:
+                        400:
+                            body:
+                                application/json:
+                                    type: Error
+                
+                /{sectionName}:
+                    delete:
+                    description: Remove the menu section
+                    headers: 
+                    responses: 
+                        200:
+                            body:
+                                application/json:
+                        400:
+                            body:
+                                application/json:
+                                    type: Error
+                    /dishes: 
+                        post:
+                            description: Add a new dish to a MenuSection
+                            headers: 
+                            body: 
+                                application/json:
+                                    properties:
+                                        restId: UUID
+                                        menuSectionName: string
+                                        dish: Dish
+                            responses: 
+                                200:
+                                    body:
+                                        application/json:
+                                400:
+                                    body:
+                                        application/json:
+                                            type: Error
+                        /{dishName}: 
+                            delete:
+                                description: Remove a dish from MenuSection
+                                headers: 
+                                body: 
+                                    application/json:
+                                        properties:
+                                            restId: UUID
+                                            menuSectionName: string
+                                            dish: string
+                                responses: 
+                                    200:
+                                        body:
+                                            application/json:
+                                    400:
+                                        body:
+                                            application/json:
+                                                type: Error
 
-    /menusection:
-        post:
-            description: Add a new menu section
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        menuSections: MenuSection
-            responses: 
-                200:
-                    body:
-                        application/json:
-                400:
-                    body:
-                        application/json:
-                            type: Error
-        delete:
-            description: Remove a menu section
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        menuSections: string
-            responses: 
-                200:
-                    body:
-                        application/json:
-                400:
-                    body:
-                        application/json:
-                            type: Error
 
-    /images:
-        post:
-            description: Add new Images to Restaurant
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        images: string[]
-            responses: 
-                200:
-                    body:
-                        application/json:
-                400:
-                    body:
-                        application/json:
-                            type: Error
-        delete:
-            description: Remove  Images from Restaurant
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        images: string[]
-            responses: 
-                200:
-                    body:
-                        application/json:
-                400:
-                    body:
-                        application/json:
-                            type: Error
-    /table:
-        post:
-            description: Add new table to Restaurant
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        table: Table
-            responses: 
-                200:
-                    body:
-                        application/json:
-                400:
-                    body:
-                        application/json:
-                            type: Error
-        delete:
-            description: Remove table from Restaurant
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        tableId: string
-            responses: 
-                200:
-                    body:
-                        application/json:
-                400:
-                    body:
-                        application/json:
-                            type: Error
-    /timetable:
-        post:
-            description: Set open-time Restaurant
-            headers: 
-            body: 
-                application/json:
-                    properties:
-                        restId: UUID
-                        timetable: Timetable
-            responses: 
-                200:
-                    body:
-                        application/json:
-                400:
-                    body:
-                        application/json:
-                            type: Error
+        /images:
+            post:
+                description: Add new Images to Restaurant
+                headers: 
+                body: 
+                    application/json:
+                        properties:
+                            restId: UUID
+                            images: string[]
+                responses: 
+                    200:
+                        body:
+                            application/json:
+                    400:
+                        body:
+                            application/json:
+                                type: Error
+            delete:
+                description: Remove the provided images from Restaurant
+                headers: 
+                body: 
+                    application/json:
+                        properties:
+                            restId: UUID
+                            images: string[]
+                responses: 
+                    200:
+                        body:
+                            application/json:
+                    400:
+                        body:
+                            application/json:
+                                type: Error
+        /table:
+            post:
+                description: Add new table to Restaurant
+                headers: 
+                body: 
+                    application/json:
+                        properties:
+                            restId: UUID
+                            table: Table
+                responses: 
+                    200:
+                        body:
+                            application/json:
+                    400:
+                        body:
+                            application/json:
+                                type: Error
+            delete:
+                description: Remove table from Restaurant
+                headers: 
+                body: 
+                    application/json:
+                        properties:
+                            restId: UUID
+                            tableId: string
+                responses: 
+                    200:
+                        body:
+                            application/json:
+                    400:
+                        body:
+                            application/json:
+                                type: Error
+        /timetable:
+            post:
+                description: Set open-time Restaurant
+                headers: 
+                body: 
+                    application/json:
+                        properties:
+                            restId: UUID
+                            timetable: Timetable
+                responses: 
+                    200:
+                        body:
+                            application/json:
+                    400:
+                        body:
+                            application/json:
+                                type: Error
     
