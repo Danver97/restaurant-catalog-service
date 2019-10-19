@@ -21,7 +21,7 @@ schemas:
     Dish:
         properties:
             name: string
-            img: string
+            image: string
             price: Price
             description: string
             ingredients: string[]
@@ -163,6 +163,17 @@ schemas:
                                         application/json:
                                             type: Error
                         /{dishName}: 
+                            put:
+                                description: Update a dish
+                                headers:
+                                body:
+                                    application/json:
+                                        properties:
+                                            image?: string
+                                            price?: Price
+                                            description?: string
+                                            ingredients?: string[]
+
                             delete:
                                 description: Remove a dish from MenuSection
                                 headers: 
