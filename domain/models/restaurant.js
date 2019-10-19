@@ -12,9 +12,9 @@ class Restaurant {
             throw new RestaurantError(`Missing the following constructor params:
             ${restId ? '' : 'restId'}${name ? '' : ' name'}${owner ? '' : ' owner'}${timetable ? '' : ' timetable'}${menu ? '' : ' menu'}${telephone ? '' : ' telephone'}`);
         if (!(timetable instanceof Timetable))
-            throw new RestaurantError(`The time is not formatted in the right way`);
+            throw new RestaurantError(`timetable is not intance of Timetable`);
         if (!(menu instanceof Menu))
-            throw new RestaurantError(`The menu is not formatted in the right way`);
+            throw new RestaurantError(`The menu is not intance of Menu`);
         if (!(telephone instanceof Phone)) // TODO: internationalize
             throw new RestaurantError(`telephone is not an instance of Phone`);
         if (typeof owner !== 'string')

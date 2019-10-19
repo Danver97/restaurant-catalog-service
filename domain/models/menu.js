@@ -12,10 +12,8 @@ class Menu {
     static fromObject(obj) {
         if (!obj)
             throw new Error('Missing obj parameter');
-        Object.keys(obj).forEach(k => {
-            obj[k] = MenuSection.fromObject(obj[k]);
-        });
-        return new Menu(obj.menuSections);
+        const sections = obj.map(s => MenuSection.fromObject(s));
+        return new Menu(sections);
     }
 
     _computeSectionNameSet(menuSections) {

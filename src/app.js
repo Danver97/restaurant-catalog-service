@@ -11,6 +11,11 @@ let queryMgr = null;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+function clientError(res, message, code) {
+    res.status(code || 400);
+    res.json({ error: message });
+}
+
 app.get('/restaurant-catalog-service', (req, res) => {
     res.json({
         service: 'restaurant-catalog-service',
@@ -60,14 +65,16 @@ app.get('/restaurant-catalog-service/restaurant/tables', async (req, res) => {
 });
 
 app.post('/restaurant-catalog-service/restaurant/create', async (req, res) => {
-    if (!req.body.restaurantName || !req.body.owner) {
+    const body = req.body;
+    if (!body.restaurantName || !body.owner) { // TODO: more body params to check
         res.status(400);
         res.json({ error: 'Missing some required parameters (name or owner).' });
         return;
     }
     try {
-        await restaurantMgr.restaurantCreated(req.body);
-        res.redirect(301, `/restaurant/${req.body.restId}`);
+        const rest = await restaurantMgr.restaurantCreated(req.body);
+        res.status(200);
+        res.json({ restId: rest.restId });
     } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
@@ -75,13 +82,13 @@ app.post('/restaurant-catalog-service/restaurant/create', async (req, res) => {
 });
 
 app.post('/restaurant-catalog-service/restaurant/remove', async (req, res) => {
-    if (!req.body.id) {
+    if (!req.body.restId) {
         res.status(400);
-        res.json({ error: 'Missing some required parameters (id).' });
+        res.json({ error: 'Missing some required parameters (restId).' });
         return;
     }
     try {
-        await restaurantMgr.restaurantRemoved(req.body.id);
+        await restaurantMgr.restaurantRemoved(req.body.restId);
         res.status(200);
         res.json({ message: 'success' });
     } catch (e) {

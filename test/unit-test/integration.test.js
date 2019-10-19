@@ -56,20 +56,24 @@ describe('Integration test', function () {
         
         it('post /restaurant-catalog-service/restaurant/create', async function () {
             await req.post('/restaurant-catalog-service/restaurant/create')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
-                .send({ id: rest.id })
+                .set('Content-Type', 'application/json')
+                // .send({ restId: rest.restId })
                 .send({ restaurantName: rest.restaurantName })
                 .send({ owner: rest.owner })
-                .expect({})
-                .expect(301);
+                .send({ timetable: Object.values(rest.timetable.days) })
+                .send({ menu: rest.menu.toJSON() })
+                .send({ telephone: rest.telephone.toJSON() })
+                .expect(res => {
+                    rest.restId = res.body.restId;
+                })
+                .expect(200);
         });
         
-        it(`get /restaurant-catalog-service/restaurant?restId=${rest.id}`, async function () {
-            await req.get(`/restaurant-catalog-service/restaurant?restId=${rest.id}`)
+        it(`get /restaurant-catalog-service/restaurant?restId=${rest.restId}`, async function () {
+            await req.get(`/restaurant-catalog-service/restaurant?restId=${rest.restId}`)
                 .expect(res => {
                     const result = res.body;
-                    // result.id = parseInt(result.id, 10);
+                    // result.restId = parseInt(result.restId, 10);
                     const expected = JSON.parse(JSON.stringify(rest));
                     // assert.deepStrictEqual(result, expected);
                     assertStrictEqual(result, expected);
@@ -78,15 +82,14 @@ describe('Integration test', function () {
         });
         it('post /restaurant-catalog-service/restaurant/remove', async function () {
             await req.post('/restaurant-catalog-service/restaurant/remove')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
-                .send({ id: rest.id })
+                .set('Content-Type', 'application/json')
+                .send({ restId: rest.restId })
                 .expect({ message: 'success' })
                 .expect(200);
         });
         
-        it(`get /restaurant-catalog-service/restaurant?restId=${rest.id}`, async function () {
-            await req.get(`/restaurant-catalog-service/restaurant?restId=${rest.id}`)
+        it(`get /restaurant-catalog-service/restaurant?restId=${rest.restId}`, async function () {
+            await req.get(`/restaurant-catalog-service/restaurant?restId=${rest.restId}`)
                 .expect(404);
         });
     });
@@ -98,17 +101,20 @@ describe('Integration test', function () {
         
         it('post /restaurant-catalog-service/restaurant/create', async function () {
             await req.post('/restaurant-catalog-service/restaurant/create')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
-                .send({ id: rest.id })
+                .set('Content-Type', 'application/json')
                 .send({ restaurantName: rest.restaurantName })
                 .send({ owner: rest.owner })
-                .expect({})
-                .expect(301);
+                .send({ timetable: Object.values(rest.timetable.days) })
+                .send({ menu: rest.menu.toJSON() })
+                .send({ telephone: rest.telephone.toJSON() })
+                .expect(res => {
+                    rest.restId = res.body.restId;
+                })
+                .expect(200);
         });
         
-        it(`get /restaurant-catalog-service/restaurant/tables?restId=${rest.id}`, async function () {
-            await req.get(`/restaurant-catalog-service/restaurant/tables?restId=${rest.id}`)
+        it(`get /restaurant-catalog-service/restaurant/tables?restId=${rest.restId}`, async function () {
+            await req.get(`/restaurant-catalog-service/restaurant/tables?restId=${rest.restId}`)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -118,16 +124,15 @@ describe('Integration test', function () {
         });
         
         it('post /restaurant-catalog-service/restaurant/addTable', async function () {
-            const table = new Table(1, rest.id, 4);
-            const table2 = new Table(2, rest.id, 4);
+            const table = new Table(1, rest.restId, 4);
+            const table2 = new Table(2, rest.restId, 4);
             await req.post('/restaurant-catalog-service/restaurant/addTable')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
+                .set('Content-Type', 'application/json')
                 .send({ restId: table.restaurantId })
                 .send({ table: JSON.stringify(table) })
                 .expect({})
                 .expect(301);
-            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.id)
+            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.restId)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -136,8 +141,7 @@ describe('Integration test', function () {
                 })
                 .expect(200);
             await req.post('/restaurant-catalog-service/restaurant/addTable')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
+                .set('Content-Type', 'application/json')
                 .send({ restId: table2.restaurantId })
                 .send({ table: JSON.stringify(table2) })
                 .expect({})
@@ -145,23 +149,21 @@ describe('Integration test', function () {
         });
         
         it('post /restaurant-catalog-service/restaurant/removeTable', async function () {
-            const table = new Table(1, rest.id, 4);
-            const table2 = new Table(2, rest.id, 4);
+            const table = new Table(1, rest.restId, 4);
+            const table2 = new Table(2, rest.restId, 4);
             await req.post('/restaurant-catalog-service/restaurant/removeTable')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
+                .set('Content-Type', 'application/json')
                 .send({ restId: table.restaurantId })
                 .send({ table: JSON.stringify(table) })
                 .expect({})
                 .expect(301);
             await req.post('/restaurant-catalog-service/restaurant/removeTable')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
+                .set('Content-Type', 'application/json')
                 .send({ restId: table.restaurantId })
                 .send({ table: table2.id })
                 .expect({})
                 .expect(301);
-            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.id)
+            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.restId)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -172,16 +174,15 @@ describe('Integration test', function () {
         });
         
         it('post /restaurant-catalog-service/restaurant/addTables', async function () {
-            const table = new Table(3, rest.id, 4);
-            const table2 = new Table(4, rest.id, 4);
+            const table = new Table(3, rest.restId, 4);
+            const table2 = new Table(4, rest.restId, 4);
             await req.post('/restaurant-catalog-service/restaurant/addTables')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
+                .set('Content-Type', 'application/json')
                 .send({ restId: table.restaurantId })
                 .send({ tables: JSON.stringify([table, table2]) })
                 .expect({})
                 .expect(301);
-            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.id)
+            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.restId)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -192,23 +193,21 @@ describe('Integration test', function () {
         });
         
         it('post /restaurant-catalog-service/restaurant/removeTables', async function () {
-            const table = new Table(3, rest.id, 4);
-            const table2 = new Table(4, rest.id, 4);
+            const table = new Table(3, rest.restId, 4);
+            const table2 = new Table(4, rest.restId, 4);
             await req.post('/restaurant-catalog-service/restaurant/removeTables')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
+                .set('Content-Type', 'application/json')
                 .send({ restId: table.restaurantId })
                 .send({ tables: JSON.stringify([table]) })
                 .expect({})
                 .expect(301);
             await req.post('/restaurant-catalog-service/restaurant/removeTables')
-                .set('Content-Type', 'application/x-www-form-urlencoded')
-                .type('form')
+                .set('Content-Type', 'application/json')
                 .send({ restId: table.restaurantId })
                 .send({ tables: JSON.stringify([table2.id]) })
                 .expect({})
                 .expect(301);
-            await req.get(`/restaurant-catalog-service/restaurant/tables?restId=${rest.id}`)
+            await req.get(`/restaurant-catalog-service/restaurant/tables?restId=${rest.restId}`)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
