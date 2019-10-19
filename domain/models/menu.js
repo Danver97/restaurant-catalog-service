@@ -127,19 +127,22 @@ class MenuSection {
 }
 
 class Dish {
-    constructor(name, price, description, ingredients) {
+    constructor(name, price, description, ingredients, image) {
         if (!name || !price)
             throw new Error(`Missing the following constructor params:${name ? '' : ' name'}${price ? '' : ' price'}`);
         if (!(price instanceof Price))
             throw new Error('price param must be instance of Price');
+        if (description && typeof description !== 'string')
+            throw new Error('description must be a string');
         if (ingredients && (!Array.isArray(ingredients) || (ingredients.length > 0 && typeof ingredients[0] !== 'string')))
             throw new Error('ingredients must be an array of string');
-        if (description && typeof description !== 'string')
+        if (image && typeof image !== 'string')
             throw new Error('description must be a string');
         this.name = name;
         this.price = price;
         this.description = description || '';
         this.ingredients = ingredients || [];
+        this.image = image;
     }
 
     compareTo(obj) {

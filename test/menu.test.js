@@ -49,6 +49,8 @@ describe('Menu module unit test', () => {
             assert.throws(() => new Dish(name), Error);
             assert.throws(() => new Dish(name, price, 123), Error);
             assert.throws(() => new Dish(name, price, description, [1, 2]), Error);
+            assert.throws(() => new Dish(name, price, description, [1, 2]), Error);
+            assert.throws(() => new Dish(name, price, description, ['adfgd'], 1), Error);
             let d = new Dish(name, price, description, ingredients);
             assert.strictEqual(d.name, name);
             assert.strictEqual(d.price, price);
