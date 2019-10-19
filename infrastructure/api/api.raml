@@ -32,9 +32,7 @@ schemas:
             name: string
             dishes: Dish[]
     Menu:
-        properties:
-            restId: UUID
-            menuSections: MenuSection[]
+        type: MenuSection[]
     OpeningInterval:
         properties:
             opening:
@@ -48,6 +46,7 @@ schemas:
     DayTimetable:
         properties:
             dayIndex: integer
+            sortIndex: integer
             openingIntevals: OpeningInterval[]
     Timetable:
         type: DayTimetable[]
