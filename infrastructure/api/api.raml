@@ -45,8 +45,8 @@ schemas:
                     m: integer
     DayTimetable:
         properties:
-            dayIndex: integer
-            openingIntevals: OpeningInterval[]
+            dayOfWeek: integer
+            openings: OpeningInterval[]
     Timetable:
         type: DayTimetable[]
         maxItems: 7
