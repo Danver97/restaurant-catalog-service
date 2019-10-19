@@ -4,6 +4,12 @@ title: Restaurant Catalog API
 version: v1
 baseUri: api.restaurant_catalog.com/{version}
 schemas: 
+    Error:
+        properties:
+            error: string
+    UUID:
+        type: string
+        pattern: ^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$
     Table:
         properties:
             tableId: string
@@ -27,7 +33,7 @@ schemas:
             dishes: Dish[]
     Menu:
         properties:
-            restId: string
+            restId: UUID
             menuSections: MenuSection[]
     OpeningInterval:
         properties:
@@ -52,7 +58,7 @@ schemas:
             reviewCount: integer
     Restaurant:
         properties:
-            restId: string
+            restId: UUID
             restaurantName: string
             review: Review
             menu: Menu
@@ -81,11 +87,10 @@ schemas:
                 body:
                     application/json:
                         type: Restaurant
-                        message: String
             400:
                 body:
                     application/json:
-                        message: String
+                        type: Error
     post:
         description: Creates a new restaurant
         headers: 
@@ -97,11 +102,10 @@ schemas:
             200:
                 body:
                     application/json:
-                     message: String
             400:
                 body:
                     application/json:
-                     message: String
+                        type: Error
     /dish:
         post:
             description: Add a new dish to an MenuSection
@@ -109,36 +113,34 @@ schemas:
             body: 
                 application/json:
                     properties:
-                        restId:String
-                        menuSectionName: String
+                        restId: UUID
+                        menuSectionName: string
                         dish: Dish
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
         delete:
             description: Remove a dish from MenuSection
             headers: 
             body: 
                 application/json:
                     properties:
-                        restId:String
-                        menuSectionName: String
+                        restId: UUID
+                        menuSectionName: string
                         dish: string
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
 
     /menusection:
         post:
@@ -147,34 +149,32 @@ schemas:
             body: 
                 application/json:
                     properties:
-                        restId:String
+                        restId: UUID
                         menuSections: MenuSection
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
         delete:
             description: Remove a menu section
             headers: 
             body: 
                 application/json:
                     properties:
-                        restId:String
+                        restId: UUID
                         menuSections: string
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
 
     /images:
         post:
@@ -183,34 +183,32 @@ schemas:
             body: 
                 application/json:
                     properties:
-                        restId: String
-                        images: String[]
+                        restId: UUID
+                        images: string[]
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
         delete:
             description: Remove  Images from Restaurant
             headers: 
             body: 
                 application/json:
                     properties:
-                        restId: String
-                        images: String[]
+                        restId: UUID
+                        images: string[]
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
     /table:
         post:
             description: Add new table to Restaurant
@@ -218,34 +216,32 @@ schemas:
             body: 
                 application/json:
                     properties:
-                        restId: String
+                        restId: UUID
                         table: Table
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
         delete:
             description: Remove table from Restaurant
             headers: 
             body: 
                 application/json:
                     properties:
-                        restId: String
-                        tableId: String
+                        restId: UUID
+                        tableId: string
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
     /timetable:
         post:
             description: Set open-time Restaurant
@@ -253,15 +249,14 @@ schemas:
             body: 
                 application/json:
                     properties:
-                        restId: String
+                        restId: UUID
                         timetable: Timetable
             responses: 
                 200:
                     body:
                         application/json:
-                        message: String
                 400:
                     body:
                         application/json:
-                        message: String
+                            type: Error
     
