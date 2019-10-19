@@ -10,7 +10,7 @@ class RestaurantManager {
         const dbmanager = this.db;
         return new Promise(async (resolve, reject) => {
             try {
-                const rest = new Restaurant(res.id, res.restaurantName, res.owner);
+                const rest = new Restaurant(res.restId, res.restaurantName, res.owner, res.timetable, res.menu, res.telephone);
                 await dbmanager.restaurantCreated(rest, cb);
                 resolve(rest);
             } catch (e) {
