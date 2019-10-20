@@ -64,9 +64,9 @@ class Restaurant {
     removeTable(table) {
         if (!this.tables) this.tables = [];
         if (!table) throw new RestaurantError('Invalid table parameter: no null or undefined parameter allowed.');
-        if (!(table instanceof Table) && !(typeof table === 'number')) throw new RestaurantError('Invalid table parameter type.');
+        if (!(table instanceof Table) && !(typeof table === 'string')) throw new RestaurantError('Invalid table parameter type: must be Table or string');
         if (table instanceof Table) this.tables = this.tables.filter(t => t.id !== table.id);
-        if (typeof table === 'number') this.tables = this.tables.filter(t => t.id !== table);
+        if (typeof table === 'string') this.tables = this.tables.filter(t => t.id !== table);
         return this.tables;
     }
 
@@ -83,7 +83,7 @@ class Restaurant {
         if (!this.tables) this.tables = [];
         const type = { add: false };
         if (checker.checkTables(tables, type)) return null;
-        if (typeof tables[0] !== 'number')
+        if (typeof tables[0] !== 'string')
             type.table = true;
         if (type.table) {
             this.tables = this.tables

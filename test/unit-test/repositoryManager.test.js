@@ -49,14 +49,6 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
                 throw e;
             }, RestaurantError);
         }
-        /* try {
-            await db.getRestaurant(rest.restId);
-        } catch (e) {
-            assert.strictEqual(e.code, 404);
-            assert.throws(() => {
-                throw e;
-            }, RestaurantError);
-        } */
     });
 
     it('check if first Restaurant tables are added', async function () {
@@ -64,10 +56,8 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         await db.restaurantCreated(rest, cb);
 
         await waitAsync(waitAsyncTimeout);
-        // tables = rest.addTable(new Table(1, rest.restId, 4));
         const restFromDb = await db.getRestaurant(rest.restId);
-        tables = restFromDb.addTable(new Table(1, rest.restId, 4));
-        // await db.tableAdded(rest, tables, cb);
+        tables = restFromDb.addTable(new Table('id1', 4));
         await db.tableAdded(restFromDb, tables, cb);
 
         await waitAsync(waitAsyncTimeout);
@@ -81,10 +71,8 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         await db.restaurantCreated(rest2, cb);
 
         await waitAsync(waitAsyncTimeout);
-        // tables2 = rest2.addTable(new Table(1, rest2.restId, 4));
         const restFromDb = await db.getRestaurant(rest2.restId);
-        tables2 = restFromDb.addTable(new Table(1, rest2.restId, 4));
-        // await db.tableAdded(rest2, tables2, cb);
+        tables2 = restFromDb.addTable(new Table('id1', 4));
         await db.tableAdded(restFromDb, tables2, cb);
 
         await waitAsync(waitAsyncTimeout);
@@ -97,7 +85,7 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         const restFromDb = await db.getRestaurant(rest2.restId);
         // tables2 = rest2.removeTable(1);
         // await db.tableRemoved(rest2, tables2);
-        tables2 = restFromDb.removeTable(1);
+        tables2 = restFromDb.removeTable('id1');
         await db.tableRemoved(restFromDb, tables2);
 
         await waitAsync(waitAsyncTimeout);
@@ -110,7 +98,7 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         const restFromDb = await db.getRestaurant(rest.restId);
         // tables = rest.removeTable(1);
         // await db.tableRemoved(rest, tables);
-        tables = restFromDb.removeTable(1);
+        tables = restFromDb.removeTable('id1');
         await db.tableRemoved(restFromDb, tables);
 
         await waitAsync(waitAsyncTimeout);

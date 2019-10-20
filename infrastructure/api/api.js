@@ -36,40 +36,7 @@ app.get('/restaurant-catalog-service/restaurants', (req, res) => {
     res.json({ response: 'get nearby restaurants' });
 });
 
-app.get('/restaurant-catalog-service/restaurant', async (req, res) => {
-    const query = req.query;
-    if (!query.restId) {
-        res.status(400);
-        res.json({ message: 'Missing query restId parameter.' });
-        return;
-    }
-    try {
-        const rest = await restaurantMgr.getRestaurant(query.restId);
-        // console.log(rest);
-        res.json(rest);
-    } catch (e) {
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-
-app.get('/restaurant-catalog-service/restaurant/tables', async (req, res) => {
-    const query = req.query;
-    if (!query.restId) {
-        res.status(400);
-        res.json({ error: 'Missing query restId parameter.' });
-        return;
-    }
-    try {
-        const tables = await restaurantMgr.getTables(req.query.restId);
-        res.json(tables);
-    } catch (e) {
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-
-app.post('/restaurant-catalog-service/restaurant/create', async (req, res) => {
+app.post('/restaurant-catalog-service/restaurants', async (req, res) => {
     const body = req.body;
     if (!body.restaurantName || !body.owner) { // TODO: more body params to check
         res.status(400);
@@ -93,6 +60,23 @@ app.post('/restaurant-catalog-service/restaurant/create', async (req, res) => {
     }
 });
 
+app.get('/restaurant-catalog-service/restaurants/:restId', async (req, res) => {
+    const params = req.params;
+    if (!params.restId) {
+        res.status(400);
+        res.json({ message: 'Missing query restId parameter.' });
+        return;
+    }
+    try {
+        const rest = await restaurantMgr.getRestaurant(params.restId);
+        // console.log(rest);
+        res.json(rest);
+    } catch (e) {
+        res.status(e.code || 500);
+        res.json({ error: e });
+    }
+});
+
 app.post('/restaurant-catalog-service/restaurant/remove', async (req, res) => {
     if (!req.body.restId) {
         res.status(400);
@@ -109,91 +93,99 @@ app.post('/restaurant-catalog-service/restaurant/remove', async (req, res) => {
     }
 });
 
-app.post('/restaurant-catalog-service/restaurant/addTable', async (req, res) => {
-    const body = req.body;
-    if (!req.body.restId || !req.body.table) {
+app.get('/restaurant-catalog-service/restaurants/:restId/tables', async (req, res) => {
+    const restId = req.params.restId;
+    if (!restId) {
         res.status(400);
-        res.json({ error: 'Missing some required parameters (restId or table).' });
+        res.json({ error: 'Missing query restId parameter.' });
         return;
     }
     try {
-        const table = JSON.parse(body.table);
-        body.table = new Table(table.id, table.restaurantId, table.people);
-    } catch (e) {
-        res.status(400);
-        res.json({ error: 'Wrong parameter: table should be a JSON object.' });
-        return;
-    }
-    try {
-        await restaurantMgr.tableAdded(body.restId, body.table);
-        res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
+        const tables = await restaurantMgr.getTables(restId);
+        res.json(tables);
     } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
 });
 
-app.post('/restaurant-catalog-service/restaurant/removeTable', async (req, res) => {
-    const body = req.body;
-    if (!req.body.restId || !req.body.table) {
+app.post('/restaurant-catalog-service/restaurants/:restId/tables', async (req, res) => {
+    const restId = req.params.restId;
+    let table = req.body;
+    if (!restId || !table) {
         res.status(400);
         res.json({ error: 'Missing some required parameters (restId or table).' });
         return;
     }
-    if (typeof body.table === 'string') {
-        const parsed = parseInt(body.table, 10);
-        if (!isNaN(parsed))
-            body.table = parsed;
-        else {
-            try {
-                const table = JSON.parse(body.table);
-                body.table = new Table(table.id, table.restaurantId, table.people);
-            } catch (e) {
-                res.status(400);
-                res.json({ error: 'Wrong parameter: table should be a JSON object or a number.' });
-                return;
-            }
-        }
+    try {
+        table = new Table(table.id, table.people);
+    } catch (e) {
+        res.status(400);
+        res.json({ error: 'Wrong table properties' });
+        return;
     }
     try {
-        await restaurantMgr.tableRemoved(body.restId, body.table);
-        res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
+        await restaurantMgr.tableAdded(restId, table);
+        res.redirect(301, `/restaurants/${restId}/tables`);
     } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
 });
 
-app.post('/restaurant-catalog-service/restaurant/addTables', async (req, res) => {
-    const body = req.body;
-    if (!body.restId || !body.tables) {
+app.delete('/restaurant-catalog-service/restaurants/:restId/tables/:tableId', async (req, res) => {
+    const restId = req.params.restId;
+    const tableId = req.params.tableId;
+    if (!restId || !tableId) {
+        res.status(400);
+        res.json({ error: 'Missing some required parameters (restId or table).' });
+        return;
+    }
+    if (typeof tableId !== 'string') {
+        res.status(400);
+        res.json({ error: 'Wrong parameter: tableId must be a string' });
+        return;
+    }
+    try {
+        await restaurantMgr.tableRemoved(restId, tableId);
+        res.redirect(301, `/restaurants/${restId}/tables`);
+    } catch (e) {
+        res.status(e.code || 500);
+        res.json({ error: e });
+    }
+});
+
+app.put('/restaurant-catalog-service/restaurants/:restId/tables', async (req, res) => {
+    const restId = req.params.restId;
+    let tables = req.body;
+    if (!restId || !tables) {
         res.status(400);
         res.json({ error: 'Missing some required parameters (restId or tables).' });
         return;
     }
     try {
-        body.tables = JSON.parse(body.tables);
+        // NO: body.tables = JSON.parse(body.tables);
         // console.log('body.tables');
         // console.log(body.tables);
-        if (!Array.isArray(body.tables))
+        if (!Array.isArray(tables))
             throw new Error('Is not array');
-        if (body.tables.length > 0 && typeof body.tables[0] !== 'object')
+        if (tables.length > 0 && typeof tables[0] !== 'object')
             throw new Error('Is not array of number or objects');
-        body.tables = body.tables.map(t => new Table(t.id, t.restaurantId, t.people));
+        tables = tables.map(t => new Table(t.id, t.people));
     } catch (e) {
         res.status(400);
-        res.json({ error: 'Wrong parameter: table should be a JSON array of objects.' });
+        res.json({ error: 'Wrong body: must be an array of objects.' });
         return;
     }
     try {
-        await restaurantMgr.tablesAdded(req.body.restId, req.body.tables);
-        res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
+        await restaurantMgr.tablesAdded(restId, tables);
+        res.redirect(301, `/restaurants/${restId}/tables`);
     } catch (e) {
         res.status(e.code || 500);
         res.json({ error: e });
     }
 });
-
+/*
 app.post('/restaurant-catalog-service/restaurant/removeTables', async (req, res) => {
     const body = req.body;
     if (!req.body.restId || !req.body.tables) {
@@ -222,7 +214,7 @@ app.post('/restaurant-catalog-service/restaurant/removeTables', async (req, res)
         res.json({ error: e });
     }
 });
-
+*/
 // TODO:
 // - check if <table> param of post add/removeTable is number.
 // - get restaurants based on position

@@ -1,16 +1,20 @@
 const RestaurantError = require('../errors/restaurant_error');
 
 class Table {
-    constructor(id, restaurantId, people) {
-        if (!id || !restaurantId || !people) throw new Error('Invalid Table object constructor parameters.');
+    constructor(id, people) {
+        if (!id || !people)
+            throw new Error(`Missing Table constructor parameters:${id ? '' : ' id'}${people ? '' : ' people'}`);
+        if (typeof id !== 'string')
+            throw new RestaurantError('id must be a string');
+        if (typeof people !== 'number')
+            throw new RestaurantError('people must be a number');
         this.id = id;
-        this.restaurantId = restaurantId;
         this.people = people;
     }
 
     static fromObject(obj) {
-        const table = new Table(obj.id, obj.restaurantId, obj.people);
-        const classKeys = ['id', 'restaurantId', 'people'];
+        const table = new Table(obj.id, obj.people);
+        const classKeys = ['id', 'people'];
         Object.keys(obj).forEach(k => {
             if (!classKeys.includes(k))
                 table[k] = obj[k];
@@ -19,7 +23,7 @@ class Table {
     }
 
     setId(id) {
-        if (!id || typeof id !== 'number') throw new RestaurantError('Invalid table id.');
+        if (typeof id !== 'string') throw new RestaurantError('Invalid table id.');
         this.id = id;
     }
 }

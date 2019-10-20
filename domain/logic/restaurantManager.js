@@ -53,14 +53,14 @@ class RestaurantManager {
         // return tables;
     }
     
-    tableRemoved(restId, table, cb) {
+    tableRemoved(restId, tableId, cb) {
         const dbmanager = this.db;
         return new Promise(async (resolve, reject) => {
             try {
                 checker.checkRestId(restId);
-                checker.checkTable(table);
+                // checker.checkTable(table);
                 let rest = await dbmanager.getRestaurant(restId);
-                const tables = rest.removeTable(table);
+                const tables = rest.removeTable(tableId);
                 await dbmanager.tableRemoved(rest, tables, cb);
                 resolve(rest);
             } catch (e) {

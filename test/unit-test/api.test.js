@@ -54,8 +54,8 @@ describe('Integration test', function () {
         const owner = 'Giacomo';
         const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
         
-        it('post /restaurant-catalog-service/restaurant/create', async function () {
-            await req.post('/restaurant-catalog-service/restaurant/create')
+        it('POST\t/restaurant-catalog-service/restaurants', async function () {
+            await req.post('/restaurant-catalog-service/restaurants')
                 .set('Content-Type', 'application/json')
                 // .send({ restId: rest.restId })
                 .send({ restaurantName: rest.restaurantName })
@@ -69,8 +69,8 @@ describe('Integration test', function () {
                 .expect(200);
         });
         
-        it(`get /restaurant-catalog-service/restaurant?restId=${rest.restId}`, async function () {
-            await req.get(`/restaurant-catalog-service/restaurant?restId=${rest.restId}`)
+        it(`GET\t/restaurant-catalog-service/restaurants/${rest.restId}`, async function () {
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}`)
                 .expect(res => {
                     const result = res.body;
                     // result.restId = parseInt(result.restId, 10);
@@ -80,7 +80,7 @@ describe('Integration test', function () {
                 })
                 .expect(200);
         });
-        it('post /restaurant-catalog-service/restaurant/remove', async function () {
+        it('POST\t/restaurant-catalog-service/restaurant/remove', async function () {
             await req.post('/restaurant-catalog-service/restaurant/remove')
                 .set('Content-Type', 'application/json')
                 .send({ restId: rest.restId })
@@ -88,8 +88,8 @@ describe('Integration test', function () {
                 .expect(200);
         });
         
-        it(`get /restaurant-catalog-service/restaurant?restId=${rest.restId}`, async function () {
-            await req.get(`/restaurant-catalog-service/restaurant?restId=${rest.restId}`)
+        it(`GET\t/restaurant-catalog-service/restaurants/${rest.restId}`, async function () {
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}`)
                 .expect(404);
         });
     });
@@ -98,9 +98,11 @@ describe('Integration test', function () {
         const name = 'I quattro cantoni';
         const owner = 'Giacomo';
         const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const table = new Table(uuid(), 4);
+        const table2 = new Table(uuid(), 4);
         
-        it('post /restaurant-catalog-service/restaurant/create', async function () {
-            await req.post('/restaurant-catalog-service/restaurant/create')
+        it('POST\t/restaurant-catalog-service/restaurants', async function () {
+            await req.post('/restaurant-catalog-service/restaurants')
                 .set('Content-Type', 'application/json')
                 .send({ restaurantName: rest.restaurantName })
                 .send({ owner: rest.owner })
@@ -113,8 +115,8 @@ describe('Integration test', function () {
                 .expect(200);
         });
         
-        it(`get /restaurant-catalog-service/restaurant/tables?restId=${rest.restId}`, async function () {
-            await req.get(`/restaurant-catalog-service/restaurant/tables?restId=${rest.restId}`)
+        it(`GET\t/restaurant-catalog-service/restaurants/${rest.restId}/tables`, async function () {
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -123,16 +125,13 @@ describe('Integration test', function () {
                 .expect(200);
         });
         
-        it('post /restaurant-catalog-service/restaurant/addTable', async function () {
-            const table = new Table(1, rest.restId, 4);
-            const table2 = new Table(2, rest.restId, 4);
-            await req.post('/restaurant-catalog-service/restaurant/addTable')
+        it(`POST\t/restaurant-catalog-service/restaurants/${rest.restId}/tables`, async function () {
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .set('Content-Type', 'application/json')
-                .send({ restId: table.restaurantId })
-                .send({ table: JSON.stringify(table) })
+                .send(table)
                 .expect({})
                 .expect(301);
-            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.restId)
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -140,30 +139,23 @@ describe('Integration test', function () {
                     assert.strictEqual(JSON.stringify(result), JSON.stringify([table]));
                 })
                 .expect(200);
-            await req.post('/restaurant-catalog-service/restaurant/addTable')
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .set('Content-Type', 'application/json')
-                .send({ restId: table2.restaurantId })
-                .send({ table: JSON.stringify(table2) })
+                .send(table2)
                 .expect({})
                 .expect(301);
         });
         
-        it('post /restaurant-catalog-service/restaurant/removeTable', async function () {
-            const table = new Table(1, rest.restId, 4);
-            const table2 = new Table(2, rest.restId, 4);
-            await req.post('/restaurant-catalog-service/restaurant/removeTable')
+        it('DELETE\t/restaurant-catalog-service/restaurants/${rest.restId}/tables/${tableId}', async function () {
+            await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/tables/${table.id}`)
                 .set('Content-Type', 'application/json')
-                .send({ restId: table.restaurantId })
-                .send({ table: JSON.stringify(table) })
                 .expect({})
                 .expect(301);
-            await req.post('/restaurant-catalog-service/restaurant/removeTable')
+            await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/tables/${table2.id}`)
                 .set('Content-Type', 'application/json')
-                .send({ restId: table.restaurantId })
-                .send({ table: table2.id })
                 .expect({})
                 .expect(301);
-            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.restId)
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -173,16 +165,13 @@ describe('Integration test', function () {
                 .expect(200);
         });
         
-        it('post /restaurant-catalog-service/restaurant/addTables', async function () {
-            const table = new Table(3, rest.restId, 4);
-            const table2 = new Table(4, rest.restId, 4);
-            await req.post('/restaurant-catalog-service/restaurant/addTables')
+        it(`PUT\t/restaurant-catalog-service/restaurants/${rest.restId}/tables`, async function () {
+            await req.put(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .set('Content-Type', 'application/json')
-                .send({ restId: table.restaurantId })
-                .send({ tables: JSON.stringify([table, table2]) })
+                .send([table, table2])
                 .expect({})
                 .expect(301);
-            await req.get('/restaurant-catalog-service/restaurant/tables?restId=' + rest.restId)
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .expect(res => {
                     const result = res.body;
                     assert.strictEqual(Array.isArray(result), true);
@@ -192,7 +181,7 @@ describe('Integration test', function () {
                 .expect(200);
         });
         
-        it('post /restaurant-catalog-service/restaurant/removeTables', async function () {
+        /*it('post /restaurant-catalog-service/restaurant/removeTables', async function () {
             const table = new Table(3, rest.restId, 4);
             const table2 = new Table(4, rest.restId, 4);
             await req.post('/restaurant-catalog-service/restaurant/removeTables')
@@ -215,6 +204,6 @@ describe('Integration test', function () {
                     assert.strictEqual(JSON.stringify(result), JSON.stringify([]));
                 })
                 .expect(200);
-        });
+        });*/
     });
 });

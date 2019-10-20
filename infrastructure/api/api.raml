@@ -224,7 +224,20 @@ schemas:
                         body:
                             application/json:
                                 type: Error
-        /table:
+        /tables:
+            put:
+                description: Replace the whole collection of tables of the restaurant
+                headers:
+                body:
+                    application/json:
+                        type: Table[]
+                responses:
+                    200:
+                        body:
+                            application/json:
+                    400:
+                        body:
+                            application/json:
             post:
                 description: Add new table to Restaurant
                 headers: 
@@ -241,22 +254,23 @@ schemas:
                         body:
                             application/json:
                                 type: Error
-            delete:
-                description: Remove table from Restaurant
-                headers: 
-                body: 
-                    application/json:
-                        properties:
-                            restId: UUID
-                            tableId: string
-                responses: 
-                    200:
-                        body:
-                            application/json:
-                    400:
-                        body:
-                            application/json:
-                                type: Error
+            /{tableId}:
+                delete:
+                    description: Remove table from Restaurant
+                    headers: 
+                    body: 
+                        application/json:
+                            properties:
+                                restId: UUID
+                                tableId: string
+                    responses: 
+                        200:
+                            body:
+                                application/json:
+                        400:
+                            body:
+                                application/json:
+                                    type: Error
         /timetable:
             post:
                 description: Set open-time Restaurant

@@ -47,7 +47,7 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if tableAdded() works properly', async function () {
-        const table = new Table(1, rest.restId, 4);
+        const table = new Table('id1', 4);
         rest.addTable(table);
         const result = await restMgr.tableAdded(rest.restId, table);
         equals(result, rest);
@@ -60,7 +60,7 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if tablesAdded() works properly', async function () {
-        const table = new Table(2, rest.restId, 4);
+        const table = new Table('id2', 4);
         rest.addTables([table]);
         await waitAsync(waitAsyncTimeout);
         
@@ -73,14 +73,14 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if tableRemoved() works properly', async function () {
-        const table = new Table(2, rest.restId, 4);
+        const table = new Table('id2', 4);
         rest.removeTable(table);
         const result = await restMgr.tableRemoved(rest.restId, table);
         equals(result, rest);
     });
     
     it('check if tablesRemoved() works properly', async function () {
-        const table = new Table(1, rest.restId, 4);
+        const table = new Table('id1', 4);
         rest.removeTables([table]);
         const result = await restMgr.tablesRemoved(rest.restId, [table]);
         equals(result, rest);
