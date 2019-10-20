@@ -21,7 +21,9 @@ const waitAsyncTimeout = 10;
 describe('Restaurant Manager unit test', function () {
     const name = 'I Quattro Cantoni';
     const owner = 'Gincarlo';
-    const rest = new Restaurant(18, name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+    const timetable = lib.defaultTimetable;
+    const menu = lib.defaultMenu;
+    const telephone = lib.defaultPhone;
     const equals = (actual, exprected) => {
         assert.strictEqual(actual.restId, exprected.restId);
         assert.strictEqual(actual.restaurantName, exprected.restaurantName);
@@ -37,13 +39,13 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if restaurantCreated() works properly', async function () {
-        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         const result = await restMgr.restaurantCreated(rest);
         equals(result, rest);
     });
     
     it('check if getRestaurant() works properly', async function () {
-        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         let result = await restMgr.restaurantCreated(rest);
 
         await waitAsync(waitAsyncTimeout);
@@ -52,7 +54,7 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if tableAdded() works properly', async function () {
-        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         let result = await restMgr.restaurantCreated(rest);
 
         const table = new Table(uuid(), 4);
@@ -66,7 +68,7 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if tablesAdded() works properly', async function () {
-        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         let result = await restMgr.restaurantCreated(rest);
 
         await waitAsync(waitAsyncTimeout);
@@ -81,7 +83,7 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if tableRemoved() works properly', async function () {
-        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         let result = await restMgr.restaurantCreated(rest);
         
         await waitAsync(waitAsyncTimeout);
@@ -100,7 +102,7 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if tablesRemoved() works properly', async function () {
-        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         let result = await restMgr.restaurantCreated(rest);
         
         await waitAsync(waitAsyncTimeout);
