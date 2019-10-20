@@ -3,7 +3,7 @@ const repo = require('./infrastructure/repository/repositoryManager')(ENV.event_
 const businessManager = require('./domain/logic/restaurantManager')(repo);
 // const eventHandlerManager = require('./infrastructure/messaging/eventHandler')(businessManager, ENV.event_broker, {});
 const queryManagerFunc = require('./infrastructure/query');
-const appFunc = require('./src/app'); // require('./infrastructure/api');
+const appFunc = require('./infrastructure/api/api');
 
 let queryManager;
 let app;

@@ -2,12 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 /*const repositoryManager = require('../infrastructure/repository/repositoryManager')();
 const restaurantManager = require('../domain/logic/restaurantManager')(repositoryManager);*/
-const Table = require('../domain/models/table');
-const timetableLib = require('../domain/models/timetable');
+const Table = require('../../domain/models/table');
+const timetableLib = require('../../domain/models/timetable');
 const Timetable = timetableLib.Timetable;
 const DayTimetable = timetableLib.DayTimetable;
-const Menu = require('../domain/models/menu').Menu;
-const Phone = require('../domain/models/phone');
+const Menu = require('../../domain/models/menu').Menu;
+const Phone = require('../../domain/models/phone');
 
 const app = express();
 let restaurantMgr = null;
