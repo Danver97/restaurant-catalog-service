@@ -1,4 +1,5 @@
 const assert = require('assert');
+const uuid = require('uuid/v4');
 const ENV = require('../../src/env');
 
 const Table = require('../../domain/models/table');
@@ -36,53 +37,84 @@ describe('Restaurant Manager unit test', function () {
     });
     
     it('check if restaurantCreated() works properly', async function () {
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
         const result = await restMgr.restaurantCreated(rest);
         equals(result, rest);
     });
     
     it('check if getRestaurant() works properly', async function () {
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        let result = await restMgr.restaurantCreated(rest);
+
         await waitAsync(waitAsyncTimeout);
-        const result = await restMgr.getRestaurant(rest.restId);
+        result = await restMgr.getRestaurant(rest.restId);
         equals(result, rest);
     });
     
     it('check if tableAdded() works properly', async function () {
-        const table = new Table('id1', 4);
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        let result = await restMgr.restaurantCreated(rest);
+
+        const table = new Table(uuid(), 4);
         rest.addTable(table);
-        const result = await restMgr.tableAdded(rest.restId, table);
+        result = await restMgr.tableAdded(rest.restId, table);
         equals(result, rest);
-    });
-    
-    it('check if getRestaurant() works properly', async function () {
+
         await waitAsync(waitAsyncTimeout);
-        const result = await restMgr.getRestaurant(rest.restId);
+        result = await restMgr.getRestaurant(rest.restId);
         equals(result, rest);
     });
     
     it('check if tablesAdded() works properly', async function () {
-        const table = new Table('id2', 4);
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        let result = await restMgr.restaurantCreated(rest);
+
+        await waitAsync(waitAsyncTimeout);
+        const table = new Table(uuid(), 4);
         rest.addTables([table]);
-        await waitAsync(waitAsyncTimeout);
-        
-        let result = await restMgr.tablesAdded(rest.restId, [table]);
+        result = await restMgr.tablesAdded(rest.restId, [table]);
         equals(result, rest);
+
         await waitAsync(waitAsyncTimeout);
-        
         result = await restMgr.getRestaurant(rest.restId);
         equals(result, rest);
     });
     
     it('check if tableRemoved() works properly', async function () {
-        const table = new Table('id2', 4);
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const table = new Table(uuid(), 4);
+        rest.addTables([table]);
+        result = await restMgr.tableAdded(rest.restId, table);
+        
+        await waitAsync(waitAsyncTimeout);
         rest.removeTable(table);
-        const result = await restMgr.tableRemoved(rest.restId, table);
+        result = await restMgr.tableRemoved(rest.restId, table);
+        equals(result, rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
         equals(result, rest);
     });
     
     it('check if tablesRemoved() works properly', async function () {
-        const table = new Table('id1', 4);
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const table = new Table(uuid(), 4);
+        rest.addTables([table]);
+        result = await restMgr.tablesAdded(rest.restId, [table]);
+        
+        await waitAsync(waitAsyncTimeout);
         rest.removeTables([table]);
-        const result = await restMgr.tablesRemoved(rest.restId, [table]);
+        result = await restMgr.tablesRemoved(rest.restId, [table]);
+        equals(result, rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
         equals(result, rest);
     });
 });
