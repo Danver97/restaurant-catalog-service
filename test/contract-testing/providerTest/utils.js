@@ -1,3 +1,4 @@
+const path = require('path');
 const { MessageProviderPact } = require('@pact-foundation/pact');
 const packageJSON = require('../../../package.json');
 const providerVersion = packageJSON.version;
