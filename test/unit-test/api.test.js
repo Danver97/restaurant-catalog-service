@@ -7,7 +7,7 @@ const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
 const repo = require('../../infrastructure/repository/repositoryManager')('testdb');
 const businessManager = require('../../domain/logic/restaurantManager')(repo);
 const queryManagerFunc = require('../../infrastructure/query');
-const appFunc = require('../../src/app');
+const appFunc = require('../../infrastructure/api/api');
 const assertStrictEqual = require('../../lib/utils').assertStrictEqual;
 
 const Table = require('../../domain/models/table');
