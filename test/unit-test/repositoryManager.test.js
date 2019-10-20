@@ -62,7 +62,7 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         // Adds tables to it
         await waitAsync(waitAsyncTimeout);
         const restFromDb = await db.getRestaurant(rest.restId);
-        tables = restFromDb.addTable(new Table('id1', 4));
+        tables = restFromDb.addTable(new Table(uuid(), 4));
         await db.tableAdded(restFromDb, tables, cb);
         
         // Checks if the tables returned are the expected one
@@ -79,7 +79,7 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         // Adds tables to it
         await waitAsync(waitAsyncTimeout);
         const restFromDb = await db.getRestaurant(rest2.restId);
-        tables2 = restFromDb.addTable(new Table('id1', 4));
+        tables2 = restFromDb.addTable(new Table(uuid(), 4));
         await db.tableAdded(restFromDb, tables2, cb);
 
         // Checks if the tables returned are the expected one
@@ -94,15 +94,16 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         await db.restaurantCreated(rest2, cb);
 
         // Adds tables to it
+        const tableId = uuid();
         await waitAsync(waitAsyncTimeout);
         let restFromDb = await db.getRestaurant(rest2.restId);
-        tables2 = restFromDb.addTable(new Table('id1', 4));
+        tables2 = restFromDb.addTable(new Table(tableId, 4));
         await db.tableAdded(restFromDb, tables2, cb);
         
         // Removes tables from it
         await waitAsync(waitAsyncTimeout);
         restFromDb = await db.getRestaurant(rest2.restId);
-        tables2 = restFromDb.removeTable('id1');
+        tables2 = restFromDb.removeTable(tableId);
         await db.tableRemoved(restFromDb, tables2);
 
         // Checks if the tables returned are the expected one
@@ -117,15 +118,16 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         await db.restaurantCreated(rest, cb);
         
         // Adds tables to it
+        const tableId = uuid();
         await waitAsync(waitAsyncTimeout);
         let restFromDb = await db.getRestaurant(rest.restId);
-        tables = restFromDb.addTable(new Table('id1', 4));
+        tables = restFromDb.addTable(new Table(tableId, 4));
         await db.tableAdded(restFromDb, tables, cb);
 
         // Removes tables from it
         await waitAsync(waitAsyncTimeout);
         restFromDb = await db.getRestaurant(rest.restId);
-        tables = restFromDb.removeTable('id1');
+        tables = restFromDb.removeTable(tableId);
         await db.tableRemoved(restFromDb, tables);
 
         // Checks if the tables returned are the expected one
