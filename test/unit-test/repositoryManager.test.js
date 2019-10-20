@@ -16,9 +16,10 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
 
     const name = 'Tavola dei quattro venti';
     const owner = 'Luca';
-    let rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+    const timetable = lib.defaultTimetable;
+    const menu = lib.defaultMenu;
+    const telephone = lib.defaultPhone;
     let tables;
-    const rest2 = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
     let tables2;
     const cb = (err, event) => {
         const doIt = false;
@@ -29,16 +30,18 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
     };
 
     it('check if Restaurant is created', async function () {
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
         await db.restaurantCreated(rest, cb);
         await waitAsync(waitAsyncTimeout);
         const response = await db.getRestaurant(rest.restId);
-        // assert.strictEqual(JSON.stringify(response), JSON.stringify(rest));
         assertStrictEqual(response, rest);
     });
 
     it('check if Restaurant is removed', async function () {
+        const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        await db.restaurantCreated(rest, cb);
         const restFromDb = await db.getRestaurant(rest.restId);
-        // await db.restaurantRemoved(rest);
+        
         await db.restaurantRemoved(restFromDb);
         await waitAsync(waitAsyncTimeout);
         try {
@@ -52,58 +55,82 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
     });
 
     it('check if first Restaurant tables are added', async function () {
-        rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         await db.restaurantCreated(rest, cb);
 
+        // Adds tables to it
         await waitAsync(waitAsyncTimeout);
         const restFromDb = await db.getRestaurant(rest.restId);
         tables = restFromDb.addTable(new Table('id1', 4));
         await db.tableAdded(restFromDb, tables, cb);
-
+        
+        // Checks if the tables returned are the expected one
         await waitAsync(waitAsyncTimeout);
-
         const response = await db.getRestaurant(rest.restId);
-        // assert.strictEqual(JSON.stringify(response.tables), JSON.stringify(tables));
         assertStrictEqual(response.tables, tables);
     });
 
     it('check if second Restaurant tables are added', async function () {
+        // Creates a restaurant
+        const rest2 = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
         await db.restaurantCreated(rest2, cb);
 
+        // Adds tables to it
         await waitAsync(waitAsyncTimeout);
         const restFromDb = await db.getRestaurant(rest2.restId);
         tables2 = restFromDb.addTable(new Table('id1', 4));
         await db.tableAdded(restFromDb, tables2, cb);
 
+        // Checks if the tables returned are the expected one
         await waitAsync(waitAsyncTimeout);
         const response = await db.getRestaurant(rest2.restId);
-        // assert.strictEqual(JSON.stringify(response.tables), JSON.stringify(tables2));
         assertStrictEqual(response.tables, tables2);
     });
 
     it('check if second Restaurant tables are removed', async function () {
-        const restFromDb = await db.getRestaurant(rest2.restId);
-        // tables2 = rest2.removeTable(1);
-        // await db.tableRemoved(rest2, tables2);
+        // Creates a restaurant
+        const rest2 = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest2, cb);
+
+        // Adds tables to it
+        await waitAsync(waitAsyncTimeout);
+        let restFromDb = await db.getRestaurant(rest2.restId);
+        tables2 = restFromDb.addTable(new Table('id1', 4));
+        await db.tableAdded(restFromDb, tables2, cb);
+        
+        // Removes tables from it
+        await waitAsync(waitAsyncTimeout);
+        restFromDb = await db.getRestaurant(rest2.restId);
         tables2 = restFromDb.removeTable('id1');
         await db.tableRemoved(restFromDb, tables2);
 
+        // Checks if the tables returned are the expected one
         await waitAsync(waitAsyncTimeout);
         const response = await db.getRestaurant(rest2.restId);
-        assert.strictEqual(JSON.stringify(response.tables), JSON.stringify([]));
-        // assertStrictEqual(response.tables, []);
+        assert.deepStrictEqual(response.tables, []);
     });
 
     it('check if first Restaurant tables are removed', async function () {
-        const restFromDb = await db.getRestaurant(rest.restId);
-        // tables = rest.removeTable(1);
-        // await db.tableRemoved(rest, tables);
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+        
+        // Adds tables to it
+        await waitAsync(waitAsyncTimeout);
+        let restFromDb = await db.getRestaurant(rest.restId);
+        tables = restFromDb.addTable(new Table('id1', 4));
+        await db.tableAdded(restFromDb, tables, cb);
+
+        // Removes tables from it
+        await waitAsync(waitAsyncTimeout);
+        restFromDb = await db.getRestaurant(rest.restId);
         tables = restFromDb.removeTable('id1');
         await db.tableRemoved(restFromDb, tables);
 
+        // Checks if the tables returned are the expected one
         await waitAsync(waitAsyncTimeout);
         const response = await db.getRestaurant(rest.restId);
-        assert.strictEqual(JSON.stringify(response.tables), JSON.stringify([]));
-        // assertStrictEqual(response.tables, []);
+        assert.deepStrictEqual(response.tables, []);
     });
 });
