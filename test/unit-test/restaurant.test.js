@@ -76,4 +76,15 @@ describe('Restaurant class unit test', function () {
         assert.deepStrictEqual(rest.removeTables([table1]), [table2]);
         assert.deepStrictEqual(rest.removeTables([table2.id]), []);
     });
+    it('check if setTimetable() works properly', function () {
+        const rest = new Restaurant(1, name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        assert.throws(() => rest.setTimetable(), RestaurantError);
+        assert.throws(() => rest.setTimetable({}), RestaurantError);
+        
+        const timetable2 = lib.defaultTimetable2;
+
+        rest.setTimetable(timetable2);
+
+        assert.deepStrictEqual(rest.timetable, timetable2);
+    });
 });
