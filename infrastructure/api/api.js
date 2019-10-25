@@ -178,7 +178,7 @@ app.put('/restaurant-catalog-service/restaurants/:restId/tables', async (req, re
         return;
     }
     try {
-        await restaurantMgr.tablesAdded(restId, tables);
+        await restaurantMgr.tablesChanged(restId, tables);
         res.redirect(301, `/restaurants/${restId}/tables`);
     } catch (e) {
         res.status(e.code || 500);
