@@ -119,4 +119,18 @@ describe('Restaurant Manager unit test', function () {
         result = await restMgr.getRestaurant(rest.restId);
         equals(result, rest);
     });
+    
+    it('check if tablesChanged() works properly', async function () {
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const table = new Table(uuid(), 4);
+        rest.setTables([table]);
+        result = await restMgr.tablesChanged(rest.restId, [table]);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
 });

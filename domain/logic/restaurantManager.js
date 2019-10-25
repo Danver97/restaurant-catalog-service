@@ -69,6 +69,21 @@ class RestaurantManager {
         });
         // return tables;
     }
+
+    tablesChanged(restId, tablesArr, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                const tables = rest.setTables(tablesArr);
+                await dbmanager.tablesChanged(rest, tables, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
     
     tablesAdded(restId, tablesArr, cb) {
         const dbmanager = this.db;
