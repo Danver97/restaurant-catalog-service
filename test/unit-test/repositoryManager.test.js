@@ -157,4 +157,24 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         const tableObj = JSON.parse(JSON.stringify(table));
         assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, tables: [tableObj]})
     });
+
+    it('check if timetableChanged works', async function () {
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+        
+        // Changes timetables to it
+        const timetable2 = lib.defaultTimetable2;
+        await waitAsync(waitAsyncTimeout);
+        let restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.setTimetable(timetable2);
+        await db.timetableChanged(restFromDb, timetable2, cb);
+
+        // Checks if the event is written correctly
+        await waitAsync(waitAsyncTimeout);
+        const eventStream = await db.getStream(rest.restId);
+        const lastEvent = eventStream[eventStream.length-1];
+        const timetableObj = JSON.parse(JSON.stringify(timetable2));
+        assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, timetable: timetableObj })
+    });
 });
