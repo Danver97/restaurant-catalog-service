@@ -47,7 +47,7 @@ class Restaurant {
 
     setTimetable(timetable) {
         if (!timetable) throw new RestaurantError('Missing the following parameter: timetable');
-        if (!(timetable instanceof Timetable)) throw new RestaurantError('timetable');
+        if (!(timetable instanceof Timetable)) throw new RestaurantError('timetable is not a instance of Timetable');
         this.schedule = schedule;
     }
 
