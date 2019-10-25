@@ -70,6 +70,15 @@ class Restaurant {
         return this.tables;
     }
 
+    setTables(tablesArr) {
+        if (!tablesArr) throw new RestaurantError('tablesArr parameter must not be null or undefined');
+        if (!Array.isArray(tablesArr) || (tablesArr.length > 0 && !(tablesArr[0] instanceof Table)))
+            throw new RestaurantError('tableArr must be an array of Table elements');
+        this.tables = tablesArr;
+        return this.tables;
+    }
+
+    // @deprecated
     addTables(tablesArr) {
         if (!this.tables) this.tables = [];
         const type = { add: true };
@@ -79,6 +88,7 @@ class Restaurant {
         return this.tables;
     }
 
+    // @deprecated
     removeTables(tables) {
         if (!this.tables) this.tables = [];
         const type = { add: false };
