@@ -46,6 +46,13 @@ function tableRemoved(rest, tables, cb) {
     // return this.save(rest.restId, rest._revisionId, restaurantEvents.tableRemoved, { id: rest.restId, tables: tables.slice() }, cb);
 }
 
+function tablesChanged(rest, tables, cb) {
+    return Promisify(async () => {
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.tablesChanged, { id: rest.restId, tables: tables.slice() });
+        if (rest._revisionId) rest._revisionId++;
+    })
+}
+
 function getRestaurant(restId, cb) {
     return Promisify(async () => {
         const stream = await this.getStream(restId);
@@ -68,6 +75,7 @@ function decorate(db) {
         restaurantRemoved: restaurantRemoved.bind(db),
         tableAdded: tableAdded.bind(db),
         tableRemoved: tableRemoved.bind(db),
+        tablesChanged: tablesChanged.bind(db),
         getRestaurant: getRestaurant.bind(db),
     });
 }

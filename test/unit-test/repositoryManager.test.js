@@ -1,6 +1,7 @@
 const assert = require('assert');
 const uuid = require('uuid/v4');
 const ENV = require('../../src/env');
+const store = require('@danver97/event-sourcing/eventStore')['testdb'];
 
 const Table = require('../../domain/models/table');
 const Restaurant = require('../../domain/models/restaurant');
@@ -134,5 +135,26 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         await waitAsync(waitAsyncTimeout);
         const response = await db.getRestaurant(rest.restId);
         assert.deepStrictEqual(response.tables, []);
+    });
+
+    it('check if tablesChanged works', async function () {
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+        
+        // Changes tables to it
+        const tableId = uuid();
+        const table = new Table(tableId, 4);
+        await waitAsync(waitAsyncTimeout);
+        let restFromDb = await db.getRestaurant(rest.restId);
+        tables = restFromDb.setTables([table]);
+        await db.tablesChanged(restFromDb, tables, cb);
+
+        // Checks if the event is written correctly
+        await waitAsync(waitAsyncTimeout);
+        const eventStream = await db.getStream(rest.restId);
+        const lastEvent = eventStream[eventStream.length-1];
+        const tableObj = JSON.parse(JSON.stringify(table));
+        assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, tables: [tableObj]})
     });
 });
