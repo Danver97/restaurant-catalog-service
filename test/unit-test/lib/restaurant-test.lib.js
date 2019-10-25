@@ -58,8 +58,40 @@ const days = {
         new OpeningInteval(new OpeningHour(18, 30), new OpeningHour(23, 30)),
     ]),
 }
+const days2 = {
+    [DayOfWeek.MONDAY.toInt()]: new DayTimetable(DayOfWeek.MONDAY, [
+        new OpeningInteval(new OpeningHour(12, 30), new OpeningHour(14, 30)),
+        new OpeningInteval(new OpeningHour(19, 30), new OpeningHour(23, 30)),
+    ]),
+    [DayOfWeek.TUESDAY.toInt()]: new DayTimetable(DayOfWeek.TUESDAY, [
+        new OpeningInteval(new OpeningHour(12, 30), new OpeningHour(14, 30)),
+        new OpeningInteval(new OpeningHour(19, 30), new OpeningHour(23, 30)),
+    ]),
+    [DayOfWeek.WEDNESDAY.toInt()]: new DayTimetable(DayOfWeek.WEDNESDAY, [
+        new OpeningInteval(new OpeningHour(12, 30), new OpeningHour(14, 30)),
+        new OpeningInteval(new OpeningHour(19, 30), new OpeningHour(23, 30)),
+    ]),
+    [DayOfWeek.THURSDAY.toInt()]: new DayTimetable(DayOfWeek.THURSDAY, [
+        new OpeningInteval(new OpeningHour(12, 30), new OpeningHour(14, 30)),
+        new OpeningInteval(new OpeningHour(19, 30), new OpeningHour(23, 30)),
+    ]),
+    [DayOfWeek.FRIDAY.toInt()]: new DayTimetable(DayOfWeek.FRIDAY, [
+        new OpeningInteval(new OpeningHour(12, 30), new OpeningHour(14, 30)),
+        new OpeningInteval(new OpeningHour(19, 30), new OpeningHour(23, 30)),
+    ]),
+    [DayOfWeek.SATURDAY.toInt()]: new DayTimetable(DayOfWeek.SATURDAY, [
+        new OpeningInteval(new OpeningHour(12, 30), new OpeningHour(14, 30)),
+        new OpeningInteval(new OpeningHour(19, 30), new OpeningHour(23, 30)),
+    ]),
+    [DayOfWeek.SUNDAY.toInt()]: new DayTimetable(DayOfWeek.SUNDAY, [
+        new OpeningInteval(new OpeningHour(12, 30), new OpeningHour(14, 30)),
+        new OpeningInteval(new OpeningHour(19, 30), new OpeningHour(23, 30)),
+    ]),
+}
 const defaultTimetable = new Timetable();
 defaultTimetable.setDays(days);
+const defaultTimetable2 = new Timetable();
+defaultTimetable2.setDays(days2);
 
 // Phone
 const defaultPhone = new Phone('+390172694784');
@@ -67,5 +99,6 @@ const defaultPhone = new Phone('+390172694784');
 module.exports = {
     defaultMenu,
     defaultTimetable,
+    defaultTimetable2,
     defaultPhone,
 };

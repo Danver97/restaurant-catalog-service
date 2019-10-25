@@ -133,4 +133,18 @@ describe('Restaurant Manager unit test', function () {
         result = await restMgr.getRestaurant(rest.restId);
         equals(result, rest);
     });
+    
+    it('check if timetableChanged() works properly', async function () {
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const timetable2 = lib.defaultTimetable2;
+        rest.setTimetable(timetable2);
+        result = await restMgr.timetableChanged(rest.restId, timetable2);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
 });

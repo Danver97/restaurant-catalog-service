@@ -128,6 +128,21 @@ class RestaurantManager {
         });
         // return tables;
     }
+
+    timetableChanged(restId, timetable, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                rest.setTimetable(timetable);
+                await dbmanager.timetableChanged(rest, rest.timetable, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
     
     getTables(restId, cb) {
         const dbmanager = this.db;
