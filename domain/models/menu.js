@@ -6,7 +6,7 @@ class Menu {
         } else
             this.menuSections = [];
         this.menuSections.sort((a, b) => a.compareTo(b));
-        this.sectionNameSet = this._computeSectionNameSet(this.menuSections);
+        this.sectionMap = this._computeSectionNameMap(this.menuSections);
     }
 
     static fromObject(obj) {
@@ -16,14 +16,14 @@ class Menu {
         return new Menu(sections);
     }
 
-    _computeSectionNameSet(menuSections) {
-        const sectionNameSet = new Set();
+    _computeSectionNameMap(menuSections) {
+        const sectionNameMap = new Map();
         menuSections.forEach(s => {
-            if (sectionNameSet.has(s.name))
+            if (sectionNameMap.has(s.name))
                 throw new Error(`Section with name ${s.name} already present in the menu`);
-            sectionNameSet.add(s.name);
+            sectionNameMap.set(s.name, s);
         });
-        return sectionNameSet;
+        return sectionNameMap;
     }
 
     _checkMenuSectionArray(menuSections) {
@@ -36,11 +36,21 @@ class Menu {
             throw new Error('Missing the following param: menuSections');
         this._checkMenuSectionArray(menuSections);
         
-        const sectionNameSet = this._computeSectionNameSet(menuSections);
+        const sectionNameSet = this._computeSectionNameMap(menuSections);
 
         this.menuSections = menuSections;
-        this.sectionNameSet = sectionNameSet;
+        this.sectionMap = sectionNameSet;
         this._sortMenuSections();
+    }
+
+    getMenuSection(menuSectionName) {
+        if (!menuSectionName)
+            throw new Error('Missing the following param: menuSectionName');
+        if (typeof menuSectionName !== 'string')
+            throw new Error('menuSectionName must be a string');
+        if (!this.sectionMap.has(menuSectionName))
+            throw new Error(`Section with name ${menuSectionName} not present in the menu`);
+        return this.sectionMap.get(menuSectionName);
     }
 
     addMenuSection(menuSection) {
@@ -48,9 +58,9 @@ class Menu {
             throw new Error('Missing the following param: menuSection');
         if (!(menuSection instanceof MenuSection))
             throw new Error('menuSection param must be an instance of MenuSection');
-        if (this.sectionNameSet.has(menuSection.name))
+        if (this.sectionMap.has(menuSection.name))
             throw new Error(`Section with name ${menuSection.name} already present in the menu`);
-        this.sectionNameSet.add(menuSection.name);
+        this.sectionMap.set(menuSection.name, menuSection);
         this.menuSections.push(menuSection);
         this._sortMenuSections();
     }
@@ -66,10 +76,10 @@ class Menu {
             name = menuSection.name;
         if (typeof menuSection === 'string')
             name = menuSection;
-        if (!this.sectionNameSet.has(name))
+        if (!this.sectionMap.has(name))
             throw new Error(`The section with name ${name} is not present in the menu`);
         let deletedSection;
-        this.sectionNameSet.delete(name);
+        this.sectionMap.delete(name);
         this.menuSections = this.menuSections.filter(s => {
             if (s.name === name) {
                 deletedSection = s;

@@ -167,14 +167,29 @@ describe('Menu module unit test', () => {
             assert.throws(() => menu.removeMenuSection(section3.name), Error);
             
             menu.menuSections = [section1, section2];
-            menu.sectionNameSet.add(section1.name)
-            menu.sectionNameSet.add(section2.name)
+            menu.sectionMap.set(section1.name, section1)
+            menu.sectionMap.set(section2.name, section2)
 
             const removedSection = menu.removeMenuSection(section1);
             assert.deepStrictEqual(removedSection, section1);
             assert.deepStrictEqual(menu.menuSections, [section2]);
             menu.removeMenuSection(section2.name);
             assert.deepStrictEqual(menu.menuSections, []);
+        });
+
+        it('check getMenuSection works', () => {
+            const menu = new Menu();
+
+            assert.throws(() => menu.getMenuSection(), Error);
+            assert.throws(() => menu.getMenuSection(1), Error);
+            assert.throws(() => menu.getMenuSection({}), Error);
+            assert.throws(() => menu.removeMenuSection(section3.name), Error);
+            
+            menu.menuSections = [section1];
+            menu.sectionMap.set(section1.name, section1)
+
+            const section = menu.getMenuSection(section1.name);
+            assert.deepStrictEqual(section, section1);
         });
 
         it('check setMenuSections works', () => {
