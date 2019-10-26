@@ -3,7 +3,13 @@ const uuid = require('uuid/v4');
 const lib = require('./lib/restaurant-test.lib');
 const Table = require('../../domain/models/table');
 const Restaurant = require('../../domain/models/restaurant');
+const timetableLib = require('../../domain/models/timetable');
+const menuLib = require('../../domain/models/menu');
+const Phone = require('../../domain/models/phone');
 const RestaurantError = require('../../domain/errors/restaurant_error');
+
+const Timetable = timetableLib.Timetable;
+const Menu = menuLib.Menu;
 
 describe('Restaurant class unit test', function () {
     const name = 'Tavola dei quattro venti';
@@ -87,4 +93,13 @@ describe('Restaurant class unit test', function () {
 
         assert.deepStrictEqual(rest.timetable, timetable2);
     });
+    it('check fromObject() works', () => {
+        const rest = new Restaurant(1, name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const obj = JSON.parse(JSON.stringify(rest));
+        const result = Restaurant.fromObject(obj);
+        assert.ok(result.timetable instanceof Timetable);
+        assert.ok(result.menu instanceof Menu);
+        assert.ok(result.telephone instanceof Phone);
+        assert.deepStrictEqual(result, rest);
+    })
 });
