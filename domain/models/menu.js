@@ -171,7 +171,7 @@ class MenuSection {
         if (!(dish instanceof Dish))
             throw new Error('dish param must be an instace of Dish');
         if (this.dishMap.has(dish.name))
-            throw new Error(`Dish with name ${d.name} already present in the section`);
+            throw new Error(`Dish with name ${dish.name} already present in the section`);
         this.dishes.push(dish);
         this.dishMap.set(dish.name, dish);
     }
@@ -194,7 +194,7 @@ class MenuSection {
                 deletedDish = d;
             return d.name !== name;
         });
-        this.dishMap.delete(dish.name);
+        this.dishMap.delete(name);
         return deletedDish;
     }
 

@@ -135,11 +135,13 @@ describe('Menu module unit test', () => {
             const removed = section.removeDish(d1);
             assert.deepStrictEqual(removed, d1);
             assert.deepStrictEqual(section.dishes, []);
+            assert.strictEqual(section.dishMap.get(d1.name), undefined);
 
             section.dishes = [d1];
             section.dishMap.set(d1.name, d1);
             section.removeDish(d1.name);
             assert.deepStrictEqual(section.dishes, []);
+            assert.strictEqual(section.dishMap.get(d1.name), undefined);
 
         });
 
@@ -212,8 +214,10 @@ describe('Menu module unit test', () => {
             const removedSection = menu.removeMenuSection(section1);
             assert.deepStrictEqual(removedSection, section1);
             assert.deepStrictEqual(menu.menuSections, [section2]);
+            assert.strictEqual(menu.sectionMap.get(section1.name), undefined);
             menu.removeMenuSection(section2.name);
             assert.deepStrictEqual(menu.menuSections, []);
+            assert.strictEqual(menu.sectionMap.get(section2.name), undefined);
         });
 
         it('check getMenuSection works', () => {
