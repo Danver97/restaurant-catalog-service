@@ -170,7 +170,8 @@ describe('Menu module unit test', () => {
             menu.sectionNameSet.add(section1.name)
             menu.sectionNameSet.add(section2.name)
 
-            menu.removeMenuSection(section1);
+            const removedSection = menu.removeMenuSection(section1);
+            assert.deepStrictEqual(removedSection, section1);
             assert.deepStrictEqual(menu.menuSections, [section2]);
             menu.removeMenuSection(section2.name);
             assert.deepStrictEqual(menu.menuSections, []);

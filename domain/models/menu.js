@@ -68,9 +68,17 @@ class Menu {
             name = menuSection;
         if (!this.sectionNameSet.has(name))
             throw new Error(`The section with name ${name} is not present in the menu`);
+        let deletedSection;
         this.sectionNameSet.delete(name);
-        this.menuSections = this.menuSections.filter(s => s.name !== name);
+        this.menuSections = this.menuSections.filter(s => {
+            if (s.name === name) {
+                deletedSection = s;
+                return false;
+            }
+            return s.name !== name;
+        });
         this._sortMenuSections();
+        return deletedSection;
     }
 
     _sortMenuSections() {
