@@ -191,7 +191,7 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         await db.restaurantCreated(rest, cb);
 
         // Adds a new section to it
-        const section = new MenuSection(1, 'Desserts');
+        const section = new MenuSection(1, 'Section x');
         let restFromDb = await db.getRestaurant(rest.restId);
         restFromDb.menu.addMenuSection(section);
         await db.menuSectionAdded(restFromDb, restFromDb.menu, cb);
@@ -211,7 +211,7 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         await db.restaurantCreated(rest, cb);
 
         // Adds a new section to it
-        const section = new MenuSection(1, 'Desserts');
+        const section = new MenuSection(1, 'Section x');
         let restFromDb = await db.getRestaurant(rest.restId);
         restFromDb.menu.addMenuSection(section);
         await db.menuSectionAdded(restFromDb, restFromDb.menu, cb);
