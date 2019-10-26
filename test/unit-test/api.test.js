@@ -206,30 +206,5 @@ describe('Integration test', function () {
                 })
                 .expect(200);
         });
-        
-        /*it('post /restaurant-catalog-service/restaurant/removeTables', async function () {
-            const table = new Table(3, rest.restId, 4);
-            const table2 = new Table(4, rest.restId, 4);
-            await req.post('/restaurant-catalog-service/restaurant/removeTables')
-                .set('Content-Type', 'application/json')
-                .send({ restId: table.restaurantId })
-                .send({ tables: JSON.stringify([table]) })
-                .expect({})
-                .expect(301);
-            await req.post('/restaurant-catalog-service/restaurant/removeTables')
-                .set('Content-Type', 'application/json')
-                .send({ restId: table.restaurantId })
-                .send({ tables: JSON.stringify([table2.id]) })
-                .expect({})
-                .expect(301);
-            await req.get(`/restaurant-catalog-service/restaurant/tables?restId=${rest.restId}`)
-                .expect(res => {
-                    const result = res.body;
-                    assert.strictEqual(Array.isArray(result), true);
-                    assert.strictEqual(result.length, 0);
-                    assert.strictEqual(JSON.stringify(result), JSON.stringify([]));
-                })
-                .expect(200);
-        });*/
     });
 });
