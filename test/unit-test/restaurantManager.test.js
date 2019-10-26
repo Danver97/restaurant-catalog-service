@@ -3,10 +3,16 @@ const uuid = require('uuid/v4');
 const ENV = require('../../src/env');
 
 const Table = require('../../domain/models/table');
+const menuLib = require('../../domain/models/menu');
 const Restaurant = require('../../domain/models/restaurant');
 const lib = require('./lib/restaurant-test.lib');
 const db = require('../../infrastructure/repository/repositoryManager')('testdb');
 const restMgr = require('../../domain/logic/restaurantManager')(db);
+
+const Menu = menuLib.Menu;
+const MenuSection = menuLib.MenuSection;
+const Dish = menuLib.Dish;
+const Price = menuLib.Price;
 
 function wait(ms) {
     const start = Date.now();
@@ -142,6 +148,95 @@ describe('Restaurant Manager unit test', function () {
         const timetable2 = lib.defaultTimetable2;
         rest.setTimetable(timetable2);
         result = await restMgr.timetableChanged(rest.restId, timetable2);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
+    
+    it('check if menuSectionAdded() works properly', async function () {
+        const menu = Menu.fromObject(JSON.parse(JSON.stringify(lib.defaultMenu)));
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const section = new MenuSection(1, 'Section x');
+        rest.menu.addMenuSection(section);
+        await restMgr.menuSectionAdded(rest.restId, section);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
+
+    it('check if menuSectionRemoved() works properly', async function () {
+        const menu = Menu.fromObject(JSON.parse(JSON.stringify(lib.defaultMenu)));
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const section = new MenuSection(1, 'Section x');
+        rest.menu.addMenuSection(section);
+        await restMgr.menuSectionAdded(rest.restId, section);
+
+        await waitAsync(waitAsyncTimeout);;
+        rest.menu.removeMenuSection(section);
+        await restMgr.menuSectionRemoved(rest.restId, section.name);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
+
+    it('check if dishAdded() works properly', async function () {
+        const menu = Menu.fromObject(JSON.parse(JSON.stringify(lib.defaultMenu)));
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const dish = new Dish('Pizza', new Price(7.99, 'EUR'), 'Best italian food');
+        rest.menu.getMenuSection(menu.menuSections[0].name).addDish(dish);
+        await restMgr.dishAdded(rest.restId, menu.menuSections[0].name, dish);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
+
+    it('check if dishRemoved() works properly', async function () {
+        const menu = Menu.fromObject(JSON.parse(JSON.stringify(lib.defaultMenu)));
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const dish = new Dish('Pizza', new Price(7.99, 'EUR'), 'Best italian food');
+        rest.menu.getMenuSection(menu.menuSections[0].name).addDish(dish);
+        await restMgr.dishAdded(rest.restId, menu.menuSections[0].name, dish);
+
+        await waitAsync(waitAsyncTimeout);
+        rest.menu.getMenuSection(menu.menuSections[0].name).removeDish(dish);
+        await restMgr.dishRemoved(rest.restId, menu.menuSections[0].name, dish);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
+
+    it('check if dishUpdated() works properly', async function () {
+        const menu = Menu.fromObject(JSON.parse(JSON.stringify(lib.defaultMenu)));
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const dish = new Dish('Pizza', new Price(7.99, 'EUR'), 'Best italian food');
+        const dish_v2 = new Dish('Pizza', new Price(6.99, 'EUR'), 'Best italian food v2');
+        rest.menu.getMenuSection(menu.menuSections[0].name).addDish(dish);
+        await restMgr.dishAdded(rest.restId, menu.menuSections[0].name, dish);
+
+        await waitAsync(waitAsyncTimeout);
+        rest.menu.getMenuSection(menu.menuSections[0].name).removeDish(dish);
+        rest.menu.getMenuSection(menu.menuSections[0].name).addDish(dish_v2);
+        await restMgr.dishUpdated(rest.restId, menu.menuSections[0].name, dish_v2);
         
         await waitAsync(waitAsyncTimeout);
         result = await restMgr.getRestaurant(rest.restId);

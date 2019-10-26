@@ -143,6 +143,83 @@ class RestaurantManager {
             }
         });
     }
+
+    menuSectionAdded(restId, menuSection, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                rest.menu.addMenuSection(menuSection);
+                await dbmanager.menuSectionAdded(rest, rest.menu, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    menuSectionRemoved(restId, menuSectionName, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                const deletedSection = rest.menu.removeMenuSection(menuSectionName);
+                await dbmanager.menuSectionRemoved(rest, rest.menu, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    dishAdded(restId, menuSectionName, dish, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                rest.menu.getMenuSection(menuSectionName).addDish(dish);
+                await dbmanager.dishAdded(rest, rest.menu, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    dishRemoved(restId, menuSectionName, dish, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                const deletedDish = rest.menu.getMenuSection(menuSectionName).removeDish(dish);
+                await dbmanager.dishRemoved(rest, rest.menu, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    dishUpdated(restId, menuSectionName, dish, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                const section = rest.menu.getMenuSection(menuSectionName);
+                const oldDish = section.removeDish(dish.name);
+                section.addDish(dish);
+                await dbmanager.dishUpdated(rest, rest.menu, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
     
     getTables(restId, cb) {
         const dbmanager = this.db;
