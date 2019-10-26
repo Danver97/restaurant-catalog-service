@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 /*const repositoryManager = require('../infrastructure/repository/repositoryManager')();
 const restaurantManager = require('../domain/logic/restaurantManager')(repositoryManager);*/
+const tablesRouteFunc = require('./tables.api');
+const timetablesRouteFunc = require('./timetables.api');
 const Table = require('../../domain/models/table');
 const timetableLib = require('../../domain/models/timetable');
 const Timetable = timetableLib.Timetable;
@@ -15,6 +17,10 @@ let queryMgr = null;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.param('restId', function (req, res, next, restId) {
+    req.restId = restId;
+    next();
+});
 
 function clientError(res, message, code) {
     res.status(code || 400);
@@ -93,153 +99,6 @@ app.post('/restaurant-catalog-service/restaurant/remove', async (req, res) => {
     }
 });
 
-app.get('/restaurant-catalog-service/restaurants/:restId/tables', async (req, res) => {
-    const restId = req.params.restId;
-    if (!restId) {
-        res.status(400);
-        res.json({ error: 'Missing query restId parameter.' });
-        return;
-    }
-    try {
-        const tables = await restaurantMgr.getTables(restId);
-        res.json(tables);
-    } catch (e) {
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-
-app.post('/restaurant-catalog-service/restaurants/:restId/tables', async (req, res) => {
-    const restId = req.params.restId;
-    let table = req.body;
-    if (!restId || !table) {
-        res.status(400);
-        res.json({ error: 'Missing some required parameters (restId or table).' });
-        return;
-    }
-    try {
-        table = new Table(table.id, table.people);
-    } catch (e) {
-        res.status(400);
-        res.json({ error: 'Wrong table properties' });
-        return;
-    }
-    try {
-        await restaurantMgr.tableAdded(restId, table);
-        res.redirect(301, `/restaurants/${restId}/tables`);
-    } catch (e) {
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-
-app.delete('/restaurant-catalog-service/restaurants/:restId/tables/:tableId', async (req, res) => {
-    const restId = req.params.restId;
-    const tableId = req.params.tableId;
-    if (!restId || !tableId) {
-        res.status(400);
-        res.json({ error: 'Missing some required parameters (restId or table).' });
-        return;
-    }
-    if (typeof tableId !== 'string') {
-        res.status(400);
-        res.json({ error: 'Wrong parameter: tableId must be a string' });
-        return;
-    }
-    try {
-        await restaurantMgr.tableRemoved(restId, tableId);
-        res.redirect(301, `/restaurants/${restId}/tables`);
-    } catch (e) {
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-
-app.put('/restaurant-catalog-service/restaurants/:restId/tables', async (req, res) => {
-    const restId = req.params.restId;
-    let tables = req.body;
-    if (!restId || !tables) {
-        res.status(400);
-        res.json({ error: 'Missing some required parameters (restId or tables).' });
-        return;
-    }
-    try {
-        // NO: body.tables = JSON.parse(body.tables);
-        // console.log('body.tables');
-        // console.log(body.tables);
-        if (!Array.isArray(tables))
-            throw new Error('Is not array');
-        if (tables.length > 0 && typeof tables[0] !== 'object')
-            throw new Error('Is not array of number or objects');
-        tables = tables.map(t => new Table(t.id, t.people));
-    } catch (e) {
-        res.status(400);
-        res.json({ error: 'Wrong body: must be an array of objects.' });
-        return;
-    }
-    try {
-        await restaurantMgr.tablesChanged(restId, tables);
-        res.redirect(301, `/restaurants/${restId}/tables`);
-    } catch (e) {
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-
-app.post('/restaurant-catalog-service/restaurants/:restId/timetables', async (req, res) => {
-    const restId = req.params.restId;
-    let timetable = req.body.timetable;
-    if (!restId || !timetable) {
-        clientError(res, 'Missing some required parameters (restId or timetable).');
-        return;
-    }
-    try {
-        timetable = Timetable.fromObject(timetable);
-    } catch (e) {
-        clientError(res, 'Bad timetable parameter');
-        return;
-    }
-    try {
-        await restaurantMgr.timetableChanged(restId, timetable);
-        res.status(200);
-        res.end();
-    } catch (e) {
-        console.log(e);
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-
-/*
-app.post('/restaurant-catalog-service/restaurant/removeTables', async (req, res) => {
-    const body = req.body;
-    if (!req.body.restId || !req.body.tables) {
-        res.status(400);
-        res.json({ error: 'Missing some required parameters (restId or tables).' });
-        return;
-    }
-    try {
-        body.tables = JSON.parse(req.body.tables);
-        if (!Array.isArray(body.tables))
-            throw new Error('Is not array');
-        if (body.tables.length > 0 && typeof body.tables[0] !== 'object' && typeof body.tables[0] !== 'number')
-            throw new Error('Is not array of number or objects');
-        if (body.tables.length > 0 && typeof body.tables[0] === 'object')
-            body.tables = body.tables.map(t => new Table(t.id, t.restaurantId, t.people));
-    } catch (e) {
-        res.status(400);
-        res.json({ error: 'Wrong parameter: table should be a JSON array of objects.' });
-        return;
-    }
-    try {
-        await restaurantMgr.tablesRemoved(body.restId, body.tables);
-        res.redirect(301, `/restaurant/tables?restId=${body.restId}`);
-    } catch (e) {
-        res.status(e.code || 500);
-        res.json({ error: e });
-    }
-});
-*/
 // TODO:
 // - check if <table> param of post add/removeTable is number.
 // - get restaurants based on position
@@ -250,6 +109,14 @@ function exportFunc(restaurantManager, queryManager) {
         throw new Error(`Missing the following parameters:${restaurantManager ? '' : ' restaurantManager'}${queryManager ? '' : ' queryManager'}`);
     restaurantMgr = restaurantManager;
     queryMgr = queryManager;
+
+    // Tables API
+    const tablesRoute = tablesRouteFunc(restaurantManager, queryManager);
+    app.use('/restaurant-catalog-service/restaurants/:restId/tables', tablesRoute);
+
+    // Timetables API
+    const timetablesRoute = timetablesRouteFunc(restaurantManager, queryManager);
+    app.use('/restaurant-catalog-service/restaurants/:restId/timetables', timetablesRoute);
     return app;
 }
 
