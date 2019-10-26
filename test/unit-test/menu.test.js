@@ -104,6 +104,29 @@ describe('Menu module unit test', () => {
 
         });
 
+        it('check removeDish works', () => {
+            const index = 1;
+            const name = 'Antipasti'
+            const section = new MenuSection(index, name);
+            assert.throws(() => section.removeDish(), Error);
+            assert.throws(() => section.removeDish(1), Error);
+            assert.throws(() => section.removeDish({}), Error);
+            assert.throws(() => section.removeDish(d1), Error);
+            assert.throws(() => section.removeDish(d1.name), Error);
+
+            section.dishes = [d1];
+            section.dishMap.set(d1.name, d1);
+            const removed = section.removeDish(d1);
+            assert.deepStrictEqual(removed, d1);
+            assert.deepStrictEqual(section.dishes, []);
+
+            section.dishes = [d1];
+            section.dishMap.set(d1.name, d1);
+            section.removeDish(d1.name);
+            assert.deepStrictEqual(section.dishes, []);
+
+        });
+
         it('check setDishes works', () => {
             const index = 1;
             const name = 'Antipasti'

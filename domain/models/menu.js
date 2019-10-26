@@ -81,10 +81,8 @@ class Menu {
         let deletedSection;
         this.sectionMap.delete(name);
         this.menuSections = this.menuSections.filter(s => {
-            if (s.name === name) {
+            if (s.name === name)
                 deletedSection = s;
-                return false;
-            }
             return s.name !== name;
         });
         this._sortMenuSections();
@@ -116,7 +114,7 @@ class MenuSection {
         this.sortIndex = sortIndex;
         this.name = name;
 
-        this.dishNameSet = this._computeDishNameSet(this.dishes);
+        this.dishMap = this._computeDishMap(this.dishes);
     }
 
     static fromObject(obj) {
@@ -126,14 +124,14 @@ class MenuSection {
         return new MenuSection(obj.sortIndex, obj.name, obj.dishes);
     }
 
-    _computeDishNameSet(dishes) {
-        const dishNameSet = new Set();
+    _computeDishMap(dishes) {
+        const dishMap = new Map();
         dishes.forEach(d => {
-            if (dishNameSet.has(d.name))
+            if (dishMap.has(d.name))
                 throw new Error(`Dish with name ${d.name} already present in the section`);
-            dishNameSet.add(d.name);
+            dishMap.set(d.name, d);
         });
-        return dishNameSet;
+        return dishMap;
     }
 
     _checkDishArray(dishes) {
@@ -152,9 +150,9 @@ class MenuSection {
             throw new Error('Missing the following param: dishes');
         this._checkDishArray(dishes);
 
-        const dishNameSet = this._computeDishNameSet(dishes);
+        const dishNameSet = this._computeDishMap(dishes);
         this.dishes = dishes;
-        this.dishNameSet = dishNameSet;
+        this.dishMap = dishNameSet;
     }
 
     addDish(dish) {
@@ -162,21 +160,32 @@ class MenuSection {
             throw new Error('Missing the following param: dish');
         if (!(dish instanceof Dish))
             throw new Error('dish param must be an instace of Dish');
-        if (this.dishNameSet.has(dish.name))
+        if (this.dishMap.has(dish.name))
             throw new Error(`Dish with name ${d.name} already present in the section`);
         this.dishes.push(dish);
-        this.dishNameSet.add(dish.name);
+        this.dishMap.set(dish.name, dish);
     }
 
     removeDish(dish) {
         if (!dish)
             throw new Error('Missing the following param: dish');
-        if (!(dish instanceof Dish))
-            throw new Error('dish param must be an instace of Dish');
-        if (!this.dishNameSet.has(dish.name))
-            throw new Error(`Dish with name ${d.name} is not present in the section`);
-        this.dishes.delete(dish);
-        this.dishNameSet.delete(dish.name);
+        if (!(dish instanceof Dish) && typeof dish !== 'string')
+            throw new Error('dish param must be an instance of Dish or a string');
+        let name;
+        if (dish instanceof Dish)
+            name = dish.name;
+        if (typeof dish === 'string')
+            name = dish;
+        if (!this.dishMap.has(name))
+            throw new Error(`Dish with name ${name} is not present in the section`);
+        let deletedDish;
+        this.dishes = this.dishes.filter(d => {
+            if (d.name === name)
+                deletedDish = d;
+            return d.name !== name;
+        });
+        this.dishMap.delete(dish.name);
+        return deletedDish;
     }
 
     toJSON() {
