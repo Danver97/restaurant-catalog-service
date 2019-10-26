@@ -47,11 +47,29 @@ class Menu {
         if (!menuSection)
             throw new Error('Missing the following param: menuSection');
         if (!(menuSection instanceof MenuSection))
-            throw new Error('menuSection param must be an instace of MenuSection');
+            throw new Error('menuSection param must be an instance of MenuSection');
         if (this.sectionNameSet.has(menuSection.name))
             throw new Error(`Section with name ${menuSection.name} already present in the menu`);
         this.sectionNameSet.add(menuSection.name);
         this.menuSections.push(menuSection);
+        this._sortMenuSections();
+    }
+
+    removeMenuSection(menuSection) {
+        let name;
+        if (!menuSection)
+            throw new Error('Missing the following param: menuSection');
+        if (!(menuSection instanceof MenuSection) && typeof menuSection !== 'string')
+            throw new Error('menuSection param must be an instance of MenuSection or a string');
+
+        if (menuSection instanceof MenuSection)
+            name = menuSection.name;
+        if (typeof menuSection === 'string')
+            name = menuSection;
+        if (!this.sectionNameSet.has(name))
+            throw new Error(`The section with name ${name} is not present in the menu`);
+        this.sectionNameSet.delete(name);
+        this.menuSections = this.menuSections.filter(s => s.name !== name);
         this._sortMenuSections();
     }
 
