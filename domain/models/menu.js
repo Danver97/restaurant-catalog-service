@@ -142,6 +142,14 @@ class MenuSection {
         this.dishes.delete(dish);
         this.dishNameSet.delete(dish.name);
     }
+
+    toJSON() {
+        return {
+            dishes: this.dishes,
+            sortIndex: this.sortIndex,
+            name: this.name,
+        };
+    }
 }
 
 class Dish {
