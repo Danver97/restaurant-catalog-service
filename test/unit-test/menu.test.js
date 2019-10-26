@@ -90,6 +90,22 @@ describe('Menu module unit test', () => {
             assert.deepStrictEqual(section.dishes, [d1]);
         });
 
+        it('check getDish works', () => {
+            const index = 1;
+            const name = 'Antipasti'
+            const section = new MenuSection(index, name);
+            assert.throws(() => section.addDish(), Error);
+            assert.throws(() => section.addDish(1), Error);
+            assert.throws(() => section.addDish({}), Error);
+            assert.throws(() => section.addDish(d1.name), Error);
+            
+            section.dishes = [d1];
+            section.dishMap.set(d1.name, d1);
+
+            const dish = section.getDish(d1.name);
+            assert.deepStrictEqual(dish, d1);
+
+        });
         it('check addDish works', () => {
             const index = 1;
             const name = 'Antipasti'

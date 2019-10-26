@@ -155,6 +155,16 @@ class MenuSection {
         this.dishMap = dishNameSet;
     }
 
+    getDish(dishName) {
+        if (!dishName)
+            throw new Error('Missing the following param: dishName');
+        if (typeof dishName !== 'string')
+            throw new Error('dishName must be a string');
+        if (!this.dishMap.has(dishName))
+            throw new Error(`Dish with name ${dishName} not present in the menuSection`);
+        return this.dishMap.get(dishName);
+    }
+
     addDish(dish) {
         if (!dish)
             throw new Error('Missing the following param: dish');
