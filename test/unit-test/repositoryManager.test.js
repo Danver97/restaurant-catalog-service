@@ -4,11 +4,18 @@ const ENV = require('../../src/env');
 const store = require('@danver97/event-sourcing/eventStore')['testdb'];
 
 const Table = require('../../domain/models/table');
+const menuLib = require('../../domain/models/menu');
+const restaurantEvents = require('../../lib/restaurant-events');
 const Restaurant = require('../../domain/models/restaurant');
 const RestaurantError = require('../../domain/errors/restaurant_error');
 const lib = require('./lib/restaurant-test.lib');
 const db = require('../../infrastructure/repository/repositoryManager')('testdb');
 const assertStrictEqual = require('../../lib/utils').assertStrictEqual;
+
+const Menu = menuLib.Menu;
+const MenuSection = menuLib.MenuSection;
+const Dish = menuLib.Dish;
+const Price = menuLib.Price;
 
 const waitAsync = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
 const waitAsyncTimeout = 50;
@@ -176,5 +183,122 @@ describe('RepositoryManager unit test using: ' + ENV.event_store, function () {
         const lastEvent = eventStream[eventStream.length-1];
         const timetableObj = JSON.parse(JSON.stringify(timetable2));
         assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, timetable: timetableObj })
+    });
+
+    it('check if menuSectionAdded works', async function () {
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+
+        // Adds a new section to it
+        const section = new MenuSection(1, 'Desserts');
+        let restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.addMenuSection(section);
+        await db.menuSectionAdded(restFromDb, restFromDb.menu, cb);
+
+        // Checks if the event is written correctly
+        await waitAsync(waitAsyncTimeout);
+        const eventStream = await db.getStream(rest.restId);
+        const lastEvent = eventStream[eventStream.length-1];
+        const menuObj = JSON.parse(JSON.stringify(restFromDb.menu));
+        assert.deepStrictEqual(lastEvent.message, restaurantEvents.menuSectionAdded);
+        assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, menu: menuObj });
+    });
+
+    it('check if menuSectionRemoved works', async function () {
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+
+        // Adds a new section to it
+        const section = new MenuSection(1, 'Desserts');
+        let restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.addMenuSection(section);
+        await db.menuSectionAdded(restFromDb, restFromDb.menu, cb);
+
+        // Removes the section to it
+        restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.removeMenuSection(section);
+        await db.menuSectionRemoved(restFromDb, restFromDb.menu, cb);
+
+        // Checks if the event is written correctly
+        await waitAsync(waitAsyncTimeout);
+        const eventStream = await db.getStream(rest.restId);
+        const lastEvent = eventStream[eventStream.length-1];
+        const menuObj = JSON.parse(JSON.stringify(restFromDb.menu));
+        assert.deepStrictEqual(lastEvent.message, restaurantEvents.menuSectionRemoved);
+        assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, menu: menuObj })
+    });
+
+    it('check if dishAdded works', async function () {
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+
+        // Adds a new dish to it
+        const dish = new Dish('Pizza', new Price(7.99, 'EUR'), 'Best italian food');
+        let restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.getMenuSection(menu.menuSections[0].name).addDish(dish);
+        await db.dishAdded(restFromDb, restFromDb.menu, cb);
+
+        // Checks if the event is written correctly
+        await waitAsync(waitAsyncTimeout);
+        const eventStream = await db.getStream(rest.restId);
+        const lastEvent = eventStream[eventStream.length-1];
+        const menuObj = JSON.parse(JSON.stringify(restFromDb.menu));
+        assert.deepStrictEqual(lastEvent.message, restaurantEvents.dishAdded);
+        assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, menu: menuObj })
+    });
+
+    it('check if dishRemoved works', async function () {
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+
+        // Adds a new dish to it
+        const dish = new Dish('Pizza', new Price(7.99, 'EUR'), 'Best italian food');
+        let restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.getMenuSection(menu.menuSections[0].name).addDish(dish);
+        await db.dishAdded(restFromDb, restFromDb.menu, cb);
+
+        // Removes the added dish
+        restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.getMenuSection(menu.menuSections[0].name).removeDish(dish);
+        await db.dishRemoved(restFromDb, restFromDb.menu, cb);
+
+        // Checks if the event is written correctly
+        await waitAsync(waitAsyncTimeout);
+        const eventStream = await db.getStream(rest.restId);
+        const lastEvent = eventStream[eventStream.length-1];
+        const menuObj = JSON.parse(JSON.stringify(restFromDb.menu));
+        assert.deepStrictEqual(lastEvent.message, restaurantEvents.dishRemoved);
+        assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, menu: menuObj })
+    });
+
+    it('check if dishUpdated works', async function () {
+        // Creates a restaurant
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        await db.restaurantCreated(rest, cb);
+
+        // Adds a new dish to it
+        const dish = new Dish('Pizza', new Price(7.99, 'EUR'), 'Best italian food');
+        const dish_v2 = new Dish('Pizza', new Price(6.99, 'EUR'), 'Best italian food v2');
+        let restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.getMenuSection(menu.menuSections[0].name).addDish(dish);
+        await db.dishAdded(restFromDb, restFromDb.menu, cb);
+
+        // Updates the added dish
+        restFromDb = await db.getRestaurant(rest.restId);
+        restFromDb.menu.getMenuSection(menu.menuSections[0].name).removeDish(dish);
+        restFromDb.menu.getMenuSection(menu.menuSections[0].name).addDish(dish_v2);
+        await db.dishUpdated(restFromDb, restFromDb.menu, cb);
+
+        // Checks if the event is written correctly
+        await waitAsync(waitAsyncTimeout);
+        const eventStream = await db.getStream(rest.restId);
+        const lastEvent = eventStream[eventStream.length-1];
+        const menuObj = JSON.parse(JSON.stringify(restFromDb.menu));
+        assert.deepStrictEqual(lastEvent.message, restaurantEvents.dishUpdated);
+        assert.deepStrictEqual(lastEvent.payload, { id: rest.restId, menu: menuObj })
     });
 });

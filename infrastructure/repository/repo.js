@@ -55,7 +55,42 @@ function tablesChanged(rest, tables, cb) {
 
 function timetableChanged(rest, timetable, cb) {
     return Promisify(async () => {
-        await this.save(rest.restId, rest._revisionId, restaurantEvents.tablesChanged, { id: rest.restId, timetable });
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.timetableChanged, { id: rest.restId, timetable });
+        if (rest._revisionId) rest._revisionId++;
+    }, cb);
+}
+
+function menuSectionAdded(rest, menu, cb) {
+    return Promisify(async () => {
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.menuSectionAdded, { id: rest.restId, menu });
+        if (rest._revisionId) rest._revisionId++;
+    }, cb);
+}
+
+function menuSectionRemoved(rest, menu, cb) {
+    return Promisify(async () => {
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.menuSectionRemoved, { id: rest.restId, menu });
+        if (rest._revisionId) rest._revisionId++;
+    }, cb);
+}
+
+function dishAdded(rest, menu, cb) {
+    return Promisify(async () => {
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.dishAdded, { id: rest.restId, menu });
+        if (rest._revisionId) rest._revisionId++;
+    }, cb);
+}
+
+function dishRemoved(rest, menu, cb) {
+    return Promisify(async () => {
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.dishRemoved, { id: rest.restId, menu });
+        if (rest._revisionId) rest._revisionId++;
+    }, cb);
+}
+
+function dishUpdated(rest, menu, cb) {
+    return Promisify(async () => {
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.dishUpdated, { id: rest.restId, menu });
         if (rest._revisionId) rest._revisionId++;
     }, cb);
 }
@@ -80,10 +115,19 @@ function decorate(db) {
     return Object.assign(db, {
         restaurantCreated: restaurantCreated.bind(db),
         restaurantRemoved: restaurantRemoved.bind(db),
+
         tableAdded: tableAdded.bind(db),
         tableRemoved: tableRemoved.bind(db),
         tablesChanged: tablesChanged.bind(db),
+
         timetableChanged: timetableChanged.bind(db),
+
+        menuSectionAdded: menuSectionAdded.bind(db),
+        menuSectionRemoved: menuSectionRemoved.bind(db),
+        dishAdded: dishAdded.bind(db),
+        dishRemoved: dishRemoved.bind(db),
+        dishUpdated: dishUpdated.bind(db),
+
         getRestaurant: getRestaurant.bind(db),
     });
 }
