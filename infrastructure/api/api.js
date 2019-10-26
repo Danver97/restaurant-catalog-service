@@ -99,10 +99,6 @@ app.post('/restaurant-catalog-service/restaurant/remove', async (req, res) => {
     }
 });
 
-// TODO:
-// - check if <table> param of post add/removeTable is number.
-// - get restaurants based on position
-
 
 function exportFunc(restaurantManager, queryManager) {
     if (!restaurantManager || !queryManager)
