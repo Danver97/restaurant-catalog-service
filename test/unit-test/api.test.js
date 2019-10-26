@@ -1,6 +1,7 @@
 const assert = require('assert');
 const uuid = require('uuid/v4');
 const request = require('supertest');
+const cloneDeep = require('lodash.clonedeep');
 const MongoClient = require('mongodb').MongoClient;
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
 
@@ -177,6 +178,31 @@ describe('Integration test', function () {
                     assert.strictEqual(Array.isArray(result), true);
                     assert.strictEqual(result.length, 2);
                     assert.strictEqual(JSON.stringify(result), JSON.stringify([table, table2]));
+                })
+                .expect(200);
+        });
+
+        it(`POST\t/restaurant-catalog-service/restaurants/${rest.restId}/timetables`, async function () {
+            const defaultTimetable2 = cloneDeep(lib.defaultTimetable2);
+            const timetable2 = cloneDeep(defaultTimetable2);
+            delete timetable2.days[1];
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/timetables`)
+                .set('Content-Type', 'application/json')
+                .expect(400);
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/timetables`)
+                .set('Content-Type', 'application/json')
+                .send({ timetable: timetable2.toJSON() })
+                .expect(400);
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/timetables`)
+                .set('Content-Type', 'application/json')
+                .send({ timetable: defaultTimetable2.toJSON() })
+                .expect({})
+                .expect(200);
+            
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}`)
+                .expect(res => {
+                    const result = res.body;
+                    assert.deepStrictEqual(result.timetable, JSON.parse(JSON.stringify(defaultTimetable2)));
                 })
                 .expect(200);
         });

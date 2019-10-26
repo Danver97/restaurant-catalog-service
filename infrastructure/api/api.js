@@ -69,7 +69,7 @@ app.get('/restaurant-catalog-service/restaurants/:restId', async (req, res) => {
     }
     try {
         const rest = await restaurantMgr.getRestaurant(params.restId);
-        // console.log(rest);
+        //rest.timetable = rest.timetable.toJSON();
         res.json(rest);
     } catch (e) {
         res.status(e.code || 500);
@@ -185,6 +185,31 @@ app.put('/restaurant-catalog-service/restaurants/:restId/tables', async (req, re
         res.json({ error: e });
     }
 });
+
+app.post('/restaurant-catalog-service/restaurants/:restId/timetables', async (req, res) => {
+    const restId = req.params.restId;
+    let timetable = req.body.timetable;
+    if (!restId || !timetable) {
+        clientError(res, 'Missing some required parameters (restId or timetable).');
+        return;
+    }
+    try {
+        timetable = Timetable.fromObject(timetable);
+    } catch (e) {
+        clientError(res, 'Bad timetable parameter');
+        return;
+    }
+    try {
+        await restaurantMgr.timetableChanged(restId, timetable);
+        res.status(200);
+        res.end();
+    } catch (e) {
+        console.log(e);
+        res.status(e.code || 500);
+        res.json({ error: e });
+    }
+});
+
 /*
 app.post('/restaurant-catalog-service/restaurant/removeTables', async (req, res) => {
     const body = req.body;
