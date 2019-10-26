@@ -6,7 +6,7 @@ const Restaurant = require('../../domain/models/restaurant');
 const timetableLib = require('../../domain/models/timetable');
 const menuLib = require('../../domain/models/menu');
 const Phone = require('../../domain/models/phone');
-const RestaurantError = require('../../domain/errors/restaurant_error');
+const RestaurantError = require('../../domain/errors/restaurant.error');
 
 const Timetable = timetableLib.Timetable;
 const Menu = menuLib.Menu;

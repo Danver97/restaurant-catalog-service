@@ -1,4 +1,4 @@
-const RestaurantError = require('../errors/restaurant_error');
+const RestaurantError = require('../errors/restaurant.error');
 
 class Table {
     constructor(id, people) {

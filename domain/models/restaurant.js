@@ -1,4 +1,4 @@
-const RestaurantError = require('../errors/restaurant_error');
+const RestaurantError = require('../errors/restaurant.error');
 const Table = require('./table');
 const Phone = require('./phone');
 const Review = require('./review');
