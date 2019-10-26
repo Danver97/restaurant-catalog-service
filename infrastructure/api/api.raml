@@ -166,11 +166,7 @@ schemas:
                                 headers:
                                 body:
                                     application/json:
-                                        properties:
-                                            image?: string
-                                            price?: Price
-                                            description?: string
-                                            ingredients?: string[]
+                                        type: Dish
 
                             delete:
                                 description: Remove a dish from MenuSection
