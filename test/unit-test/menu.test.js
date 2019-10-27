@@ -31,10 +31,10 @@ describe('Menu module unit test', () => {
             const p = new Price(15.5, 'EUR');
             const space = String.fromCharCode(160)
             assert.strictEqual(p.toString('en-GB'), '€15.50');
-            assert.ok(/€\u00a0?15.50/.test(p.toString('it-IT')));
+            assert.ok(/^€\u00a0?15.50$/.test(p.toString('it-IT')));
             const p2 = new Price(15.5, 'GBP');
             assert.strictEqual(p2.toString('en-GB'), '£15.50');
-            assert.ok(/£\u00a0?15.50/.test(p2.toString('it-IT')));
+            assert.ok(/^£\u00a0?15.50$/.test(p2.toString('it-IT')));
         });
     });
 
