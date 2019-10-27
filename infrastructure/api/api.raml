@@ -142,6 +142,10 @@ schemas:
                             body:
                                 application/json:
                                     type: Error
+                        404:
+                            body:
+                                application/json:
+                                    type: Error
                     /dishes: 
                         post:
                             description: Add a new dish to a MenuSection
