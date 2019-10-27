@@ -30,11 +30,11 @@ describe('Menu module unit test', () => {
         it('check toString works', () => {
             const p = new Price(15.5, 'EUR');
             const space = String.fromCharCode(160)
-            assert.strictEqual(p.toString('en-GB').replace(space, ' '), '€15.50');
-            assert.strictEqual(p.toString('it-IT').replace(space, ' '), '€ 15.50');
+            assert.strictEqual(p.toString('en-GB'), '€15.50');
+            assert.strictEqual(p.toString('it-IT'), `€${space}15.50`);
             const p2 = new Price(15.5, 'GBP');
-            assert.strictEqual(p2.toString('en-GB').replace(space, ' '), '£15.50');
-            assert.strictEqual(p2.toString('it-IT').replace(space, ' '), '£ 15.50');
+            assert.strictEqual(p2.toString('en-GB'), '£15.50');
+            assert.strictEqual(p2.toString('it-IT'), `£${space}15.50`);
         });
     });
 
