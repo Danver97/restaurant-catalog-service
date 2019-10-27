@@ -11,9 +11,14 @@ const queryManagerFunc = require('../../infrastructure/query');
 const appFunc = require('../../infrastructure/api/api');
 const assertStrictEqual = require('../../lib/utils').assertStrictEqual;
 
+const menuLib = require('../../domain/models/menu');
 const Table = require('../../domain/models/table');
 const Restaurant = require('../../domain/models/restaurant');
 const lib = require('./lib/restaurant-test.lib');
+
+const MenuSection = menuLib.MenuSection;
+const Dish = menuLib.Dish;
+const Price = menuLib.Price;
 
 
 const mongod = new MongoMemoryServer();
@@ -99,6 +104,9 @@ describe('Integration test', function () {
         const name = 'I quattro cantoni';
         const owner = 'Giacomo';
         const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        const menuSection = new MenuSection(1, 'Section x');
+        const dish = new Dish('Fruit Mix', new Price(7.99, 'EUR'), 'A fruit mix', ['banana', 'strawberry']);
+        const dish_v2 = new Dish('Fruit Mix', new Price(8.99, 'EUR'));
         const table = new Table(uuid(), 4);
         const table2 = new Table(uuid(), 4);
         
@@ -203,6 +211,147 @@ describe('Integration test', function () {
                 .expect(res => {
                     const result = res.body;
                     assert.deepStrictEqual(result.timetable, JSON.parse(JSON.stringify(defaultTimetable2)));
+                })
+                .expect(200);
+        });
+
+        it(`GET\t/restaurant-catalog-service/restaurants/${rest.restId}/menu`, async function () {
+            
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
+                .expect(res => {
+                    const menu = res.body;
+                    const expected = JSON.parse(JSON.stringify(rest.menu));
+                    assert.deepStrictEqual(menu, expected);
+                })
+                .expect(200);
+        });
+
+        it(`POST\t/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections`, async function () {
+            
+            const menuSectionErr = Object.assign({}, menuSection);
+            delete menuSectionErr.name;
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections`)
+                .set('Content-Type', 'application/json')
+                .expect(400);
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections`)
+                .set('Content-Type', 'application/json')
+                .send({ menuSection: menuSectionErr })
+                .expect(400);
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections`)
+                .set('Content-Type', 'application/json')
+                .send({ menuSection })
+                .expect(200);
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections`)
+                .set('Content-Type', 'application/json')
+                .send({ menuSection })
+                .expect(400);
+
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
+                .expect(res => {
+                    const menu = res.body;
+                    const actual = menu.filter(s => s.name === menuSection.name)[0];
+                    const expected = JSON.parse(JSON.stringify(menuSection));
+                    assert.deepStrictEqual(actual, expected);
+                })
+                .expect(200);
+        });
+
+        it(`POST\t/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes`, async function () {
+            
+            menuSection.addDish(dish);
+            const dishErr = Object.assign({}, dish);
+            delete dishErr.name;
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/NotExistentSection/dishes`)
+                .set('Content-Type', 'application/json')
+                .send({ dish })
+                .expect(404);
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes`)
+                .set('Content-Type', 'application/json')
+                .send({ dish: dishErr })
+                .expect(400);
+            await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes`)
+                .set('Content-Type', 'application/json')
+                .send({ dish })
+                .expect(200);
+
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
+                .expect(res => {
+                    const menu = res.body;
+                    const actual = menu.filter(s => s.name === menuSection.name)[0];
+                    const expected = JSON.parse(JSON.stringify(menuSection));
+                    assert.deepStrictEqual(actual, expected);
+                })
+                .expect(200);
+        });
+
+        it(`PUT\t/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes/${dish.name}`, async function () {
+            
+            menuSection.removeDish(dish);
+            menuSection.addDish(dish_v2);
+            const dishErr = Object.assign({}, dish_v2);
+            delete dishErr.name;
+            await req.put(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/NotExistentSection/dishes/${dish.name}`)
+                .set('Content-Type', 'application/json')
+                .send({ dish: dish_v2 })
+                .expect(404);
+            await req.put(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes/${dish.name}`)
+                .set('Content-Type', 'application/json')
+                .send({ dish: dishErr })
+                .expect(400);
+            await req.put(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes/${dish.name}`)
+                .set('Content-Type', 'application/json')
+                .send({ dish: dish_v2 })
+                .expect(200);
+
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
+                .expect(res => {
+                    const menu = res.body;
+                    const actual = menu.filter(s => s.name === menuSection.name)[0];
+                    const expected = JSON.parse(JSON.stringify(menuSection));
+                    assert.deepStrictEqual(actual, expected);
+                })
+                .expect(200);
+        });
+
+        it(`DELETE\t/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes/${dish_v2.name}`, async function () {
+            
+            menuSection.removeDish(dish_v2);
+            await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/NotExistentSection/dishes/${dish_v2.name}`)
+                .set('Content-Type', 'application/json')
+                .expect(404);
+            await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes/NotExistentDish`)
+                .set('Content-Type', 'application/json')
+                .expect(404);
+            await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes/${dish_v2.name}`)
+                .set('Content-Type', 'application/json')
+                .expect(200);
+
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
+                .expect(res => {
+                    const menu = res.body;
+                    const actual = menu.filter(s => s.name === menuSection.name)[0];
+                    const expected = JSON.parse(JSON.stringify(menuSection));
+                    assert.deepStrictEqual(actual, expected);
+                })
+                .expect(200);
+        });
+
+        it(`DELETE\t/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}`, async function () {
+            
+            const menuSectionErr = Object.assign({}, menuSection);
+            delete menuSectionErr.name;
+            await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/aaaaaaaaaaaaa`)
+                .set('Content-Type', 'application/json')
+                .expect(404);
+            await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}`)
+                .set('Content-Type', 'application/json')
+                .expect(200);
+
+            await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
+                .expect(res => {
+                    const menu = res.body;
+                    const actual = menu.filter(s => s.name === menuSection.name)[0];
+                    assert.deepStrictEqual(actual, undefined);
                 })
                 .expect(200);
         });

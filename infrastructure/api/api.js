@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const restaurantManager = require('../domain/logic/restaurantManager')(repositoryManager);*/
 const tablesRouteFunc = require('./tables.api');
 const timetablesRouteFunc = require('./timetables.api');
+const menuRouteFunc = require('./menu.api');
 const Table = require('../../domain/models/table');
 const timetableLib = require('../../domain/models/timetable');
 const Timetable = timetableLib.Timetable;
@@ -113,6 +114,10 @@ function exportFunc(restaurantManager, queryManager) {
     // Timetables API
     const timetablesRoute = timetablesRouteFunc(restaurantManager, queryManager);
     app.use('/restaurant-catalog-service/restaurants/:restId/timetables', timetablesRoute);
+
+    // Menu API
+    const menuRoute = menuRouteFunc(restaurantManager, queryManager);
+    app.use('/restaurant-catalog-service/restaurants/:restId/menu', menuRoute);
     return app;
 }
 
