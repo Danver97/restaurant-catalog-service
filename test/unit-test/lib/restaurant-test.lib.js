@@ -1,6 +1,13 @@
+const Table = require('../../../domain/models/table');
 const menuLib = require('../../../domain/models/menu');
 const timetableLib = require('../../../domain/models/timetable');
 const Phone = require('../../../domain/models/phone');
+
+// Table
+
+const defaultTables1 = [new Table('1', 4), new Table('2', 5)];
+const defaultTables2 = [new Table('1', 4), new Table('2', 5), new Table('3', 6)];
+const defaultTables3 = [new Table('1', 4)];
 
 // Menu
 const Menu = menuLib.Menu;
@@ -19,6 +26,25 @@ const defaultMenuSections = [
     ]),
 ]
 const defaultMenu = new Menu(defaultMenuSections);
+
+const defaultMenuSections2 = [
+    new MenuSection(2, 'Primi', [
+        new Dish('Pasta cacio pepe', new Price(7.99, 'EUR'), 'bla bla', ['Pasta', 'Cacio', 'Pepe']),
+        new Dish('Amatriciana', new Price(8.99, 'EUR'), 'bla bla', ['Pasta', 'Guanciale', 'Eggs']),
+    ]),
+]
+const defaultMenu2 = new Menu(defaultMenuSections2);
+
+const defaultMenuSections3 = [
+    new MenuSection(1, 'Antipasti', [
+        new Dish('Bruschetta', new Price(3.99, 'EUR'), 'bla bla', ['Bread', 'Tomato']),
+    ]),
+    new MenuSection(2, 'Primi', [
+        new Dish('Pasta cacio pepe', new Price(7.99, 'EUR'), 'bla bla', ['Pasta', 'Cacio', 'Pepe']),
+        new Dish('Amatriciana', new Price(8.99, 'EUR'), 'bla bla', ['Pasta', 'Guanciale', 'Eggs']),
+    ]),
+]
+const defaultMenu3 = new Menu(defaultMenuSections3);
 
 
 // Timetable
@@ -97,7 +123,12 @@ defaultTimetable2.setDays(days2);
 const defaultPhone = new Phone('+390172694784');
 
 module.exports = {
+    defaultTables1,
+    defaultTables2,
+    defaultTables3,
     defaultMenu,
+    defaultMenu2,
+    defaultMenu3,
     defaultTimetable,
     defaultTimetable2,
     defaultPhone,
