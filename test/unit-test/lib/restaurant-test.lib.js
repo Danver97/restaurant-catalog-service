@@ -1,7 +1,9 @@
+const uuid = require('uuid/v4');
 const Table = require('../../../domain/models/table');
 const menuLib = require('../../../domain/models/menu');
 const timetableLib = require('../../../domain/models/timetable');
 const Phone = require('../../../domain/models/phone');
+const Restaurant = require('../../../domain/models/restaurant');
 
 // Table
 
@@ -122,6 +124,12 @@ defaultTimetable2.setDays(days2);
 // Phone
 const defaultPhone = new Phone('+390172694784');
 
+// Restaurant
+
+function restaurant(restId, name) {
+    return new Restaurant(restId || uuid(), name || 'Default Restaurant', uuid(), defaultTimetable, defaultMenu, defaultPhone);
+}
+
 module.exports = {
     defaultTables1,
     defaultTables2,
@@ -132,4 +140,5 @@ module.exports = {
     defaultTimetable,
     defaultTimetable2,
     defaultPhone,
+    restaurant
 };

@@ -13,12 +13,22 @@ function nearme(cb) {
     }, cb);
 }
 
+function getRestaurant(restId, cb) {
+    return Promisify(async () => {
+        const doc = await mongoCollection.findOne({ _id: restId });
+        if (!doc)
+            throw new QueryError('Restaurant not found', QueryError.notFound);
+        return Restaurant.fromObject(doc);
+    }, cb);
+}
+
 function exportFunc(mongodbCollection) {
     if (!mongodbCollection)
         throw new QueryError(`Missing the following parameters:${mongodbCollection ? '' : ' mongodbCollection'}`, QueryError.paramError);
     mongoCollection = mongodbCollection;
     return {
-        nearme
+        nearme,
+        getRestaurant,
     };
 }
 
