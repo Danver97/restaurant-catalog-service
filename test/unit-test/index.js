@@ -5,3 +5,4 @@ require('./restaurant.test');
 require('./repositoryManager.test');
 require('./restaurantManager.test');
 require('./api.test');
+require('./denormalizers');

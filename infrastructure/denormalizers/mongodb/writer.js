@@ -115,23 +115,23 @@ class Writer {
     }
 
     menuSectionAdded(restaurantId, _revisionId, menu, cb) {
-        return menuChanged(restaurantId, _revisionId, menu, cb);
+        return this.menuChanged(restaurantId, _revisionId, menu, cb);
     }
 
     menuSectionRemoved(restaurantId, _revisionId, menu, cb) {
-        return menuChanged(restaurantId, _revisionId, menu, cb);
+        return this.menuChanged(restaurantId, _revisionId, menu, cb);
     }
 
     dishAdded(restaurantId, _revisionId, menu, cb) {
-        return menuChanged(restaurantId, _revisionId, menu, cb);
+        return this.menuChanged(restaurantId, _revisionId, menu, cb);
     }
-    
+
     dishRemoved(restaurantId, _revisionId, menu, cb) {
-        return menuChanged(restaurantId, _revisionId, menu, cb);
+        return this.menuChanged(restaurantId, _revisionId, menu, cb);
     }
 
     dishUpdated(restaurantId, _revisionId, menu, cb) {
-        return menuChanged(restaurantId, _revisionId, menu, cb);
+        return this.menuChanged(restaurantId, _revisionId, menu, cb);
     }
 }
 

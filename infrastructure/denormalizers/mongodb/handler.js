@@ -26,27 +26,27 @@ class EventHandler {
     }
     
     timetableChanged(e, cb) {
-        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.timetable, cb);
+        return this.writer.timetableChanged(e.streamId, e.eventId - 1, e.payload.timetable, cb);
     }
     
     menuSectionAdded(e, cb) {
-        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+        return this.writer.menuSectionAdded(e.streamId, e.eventId - 1, e.payload.menu, cb);
     }
     
     menuSectionRemoved(e, cb) {
-        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+        return this.writer.menuSectionRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
     }
     
     dishAdded(e, cb) {
-        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+        return this.writer.dishAdded(e.streamId, e.eventId - 1, e.payload.menu, cb);
     }
     
     dishRemoved(e, cb) {
-        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+        return this.writer.dishRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
     }
     
     dishUpdated(e, cb) {
-        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+        return this.writer.dishUpdated(e.streamId, e.eventId - 1, e.payload.menu, cb);
     }
 
     async handleEvent(e, ack) {

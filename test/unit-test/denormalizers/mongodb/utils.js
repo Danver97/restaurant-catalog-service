@@ -19,4 +19,12 @@ function restaurant(streamId, userId) {
 
 module.exports = {
     restaurant,
+    defaultTables1: restUtils.defaultTables1,
+    defaultTables2: restUtils.defaultTables2,
+    defaultTables3: restUtils.defaultTables3,
+    defaultTimetables1: restUtils.defaultTimetable,
+    defaultTimetables2: restUtils.defaultTimetable2,
+    defaultMenu1: restUtils.defaultMenu,
+    defaultMenu2: restUtils.defaultMenu2,
+    defaultMenu3: restUtils.defaultMenu3,
 };
