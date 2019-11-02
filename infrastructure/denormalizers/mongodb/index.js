@@ -74,7 +74,7 @@ exports.mongoDenormalizer = async function(event) {
     });
     const promises = [];
     for (let m of messages) {
-        promises.push(handler(m));
+        promises.push(handler.handleEvent(m));
     }
     await Promise.all(promises);
 }

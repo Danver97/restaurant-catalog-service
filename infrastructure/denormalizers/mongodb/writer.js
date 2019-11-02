@@ -76,6 +76,14 @@ class Writer {
         );
     }
     
+    tableAdded(restaurantId, _revisionId, tables, cb) {
+        return this.tablesChanged(restaurantId, _revisionId, tables, cb);
+    }
+
+    tableRemoved(restaurantId, _revisionId, tables, cb) {
+        return this.tablesChanged(restaurantId, _revisionId, tables, cb);
+    }
+    
     tablesChanged(restaurantId, _revisionId, tables, cb) {
         return Promisify(
             () => this.collection.updateOne(
@@ -85,75 +93,46 @@ class Writer {
             cb,
         );
     }
+
+    timetableChanged(restaurantId, _revisionId, timetable, cb) {
+        return Promisify(
+            () => this.collection.updateOne(
+                { _id: restaurantId, _revisionId },
+                { $set: { timetable }, $inc: { _revisionId: 1 } },
+            ),
+            cb,
+        );
+    }
+
+    menuChanged(restaurantId, _revisionId, menu, cb) {
+        return Promisify(
+            () => this.collection.updateOne(
+                { _id: restaurantId, _revisionId },
+                { $set: { menu }, $inc: { _revisionId: 1 } },
+            ),
+            cb,
+        );
+    }
+
+    menuSectionAdded(restaurantId, _revisionId, menu, cb) {
+        return menuChanged(restaurantId, _revisionId, menu, cb);
+    }
+
+    menuSectionRemoved(restaurantId, _revisionId, menu, cb) {
+        return menuChanged(restaurantId, _revisionId, menu, cb);
+    }
+
+    dishAdded(restaurantId, _revisionId, menu, cb) {
+        return menuChanged(restaurantId, _revisionId, menu, cb);
+    }
     
-    tableAdded(restaurantId, _revisionId, tables, cb) {
-        return this.tablesChanged(restaurantId, _revisionId, tables, cb);
+    dishRemoved(restaurantId, _revisionId, menu, cb) {
+        return menuChanged(restaurantId, _revisionId, menu, cb);
     }
 
-    tableRemoved(restaurantId, _revisionId, tables, cb) {
-        return this.tablesChanged(restaurantId, _revisionId, tables, cb);
+    dishUpdated(restaurantId, _revisionId, menu, cb) {
+        return menuChanged(restaurantId, _revisionId, menu, cb);
     }
-
-    tablesAdded(restaurantId, _revisionId, tables, cb) {
-        return this.tablesChanged(restaurantId, _revisionId, tables, cb);
-    }
-
-    tablesRemoved(restaurantId, _revisionId, tables, cb) {
-        return this.tablesChanged(restaurantId, _revisionId, tables, cb);
-    }
-    /*
-    reservationCreated(reservation, cb) {
-        reservation._id = reservation.resId;
-        reservation._revisionId = 1;
-        return Promisify(async () => {
-            await this.collection.insertOne(reservation);
-        }, cb);
-    }
-
-    reservationConfirmed(resId, _revisionId, payload, cb) {
-        const status = payload.status;
-        const table = payload.table;
-        return Promisify(async () => {
-            const update = { $set: { status }, $inc: { _revisionId: 1 } };
-            if (table)
-                update.$set.table = { id: table.id, people: table.people };
-            await this.collection.updateOne({ _id: resId, _revisionId }, update);
-        }, cb);
-    }
-
-    reservationRejected(resId, _revisionId, status, cb) {
-        return Promisify(async () => {
-            await this.collection.updateOne({ _id: resId, _revisionId }, { $set: { status }, $inc: { _revisionId: 1 } });
-        }, cb);
-    }
-
-    reservationCancelled(resId, _revisionId, status, cb) {
-        return Promisify(async () => {
-            await this.collection.updateOne({ _id: resId, _revisionId }, { $set: { status }, $inc: { _revisionId: 1 } });
-        }, cb);
-    }
-
-    restaurantReservationsCreated(restaurantReservations, cb) {
-        restaurantReservations._id = restaurantReservations.restId;
-        restaurantReservations._revisionId = 1;
-        restaurantReservations.reservations = [];
-        return Promisify(() => this.collection.insertOne(restaurantReservations), cb);
-    }
-
-    reservationAdded(restId, _revisionId, reservation, cb) {
-        return Promisify(() => this.collection.updateOne(
-            { _id: restId, _revisionId },
-            { $push: { reservations: { $each: [reservation], $sort: { date: 1 } } }, $inc: { _revisionId: 1 } },
-        ), cb);
-    }
-
-    reservationRemoved(restId, _revisionId, resId, cb) {
-        return Promisify(() => this.collection.updateOne(
-            { _id: restId, _revisionId },
-            { $pull: { reservations: { resId } }, $inc: { _revisionId: 1 } }
-        ), cb);
-    }
-    */
 }
 
 /**

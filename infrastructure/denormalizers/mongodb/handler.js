@@ -1,122 +1,94 @@
-const Promisify = require('promisify-cb');
+class EventHandler {
+    constructor(writer, orderCtrl) {
+        this.writer = writer;
+        this.orderCtrl = orderCtrl;
 
-const dependencies = {
-    projector: null,
-};
+    }
 
+    restaurantCreated(e, cb) {
+        return this.writer.restaurantCreated(e.payload, cb);
+    }
+    
+    ownerChanged(e, cb) {
+        return this.writer.ownerChanged(e.streamId, e.eventId - 1, e.payload.owner, cb);
+    }
+    
+    tableAdded(e, cb) {
+        return this.writer.tableAdded(e.streamId, e.eventId - 1, e.payload.tables, cb);
+    }
+    
+    tableRemoved(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.tables, cb);
+    }
+    
+    tablesChanged(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.tables, cb);
+    }
+    
+    timetableChanged(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.timetable, cb);
+    }
+    
+    menuSectionAdded(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+    }
+    
+    menuSectionRemoved(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+    }
+    
+    dishAdded(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+    }
+    
+    dishRemoved(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+    }
+    
+    dishUpdated(e, cb) {
+        return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.menu, cb);
+    }
 
-function restaurantCreated(e) {
-    return Promisify(async () => {
-        const projector = dependencies.projector;
-        await projector.restaurantCreated(e.payload);
-    });
+    async handleEvent(e, ack) {
+        if (!e)
+            return;
+        if (typeof this[e.message] === 'function') {
+            let lastEventId = (await this.orderCtrl.getLastProcessedEvent(e.streamId)).eventId;
+            lastEventId = (lastEventId === undefined || lastEventId === null) ? 0 : lastEventId;
+    
+            console.log(`Last EventId: ${lastEventId}
+            Expected EventId: ${lastEventId + 1}
+            Current EventId: ${e.eventId}`);
+            // If it is and old event
+            if (e.eventId <= lastEventId) {
+                // Removes it from the queue without processing it
+                console.log(`Current EId is lower or equals that lastEId.
+                Current event is an old event. Will be removed without processing it.`);
+                await acknoledge(ack);
+                return;
+            }
+            // If it is a too young event
+            if (e.eventId > lastEventId + 1) {
+                // Ignore it
+                console.log(`Current EId is bigger that expected EId
+                Current event is a future event. Will be ignored without removing it from queue.`);
+                console.log('Expected eventId:', lastEventId + 1, 'Found:', e.eventId);
+                await dontAcknoledge(ack);
+                return;
+            }
+    
+            // If it is the next event that needs to be processed
+            if (e.eventId === lastEventId + 1) {
+                // Process it
+                console.log(`Current EId is equal the expected EId
+                Current event is the expected event. Will be processed.`);
+                await this[e.message](e);
+                await this.orderCtrl.updateLastProcessedEvent(e.streamId, lastEventId, e.eventId);
+                await acknoledge(ack);
+            }
+        }
+    }
 }
-
-function ownerChanged(e) {
-    return Promisify(async () => {
-        const projector = dependencies.projector;
-        await projector.ownerChanged(e.streamId, e.eventId - 1, e.payload.owner);
-    });
-}
-
-function tableAdded(e) {
-    return Promisify(async () => {
-        const projector = dependencies.projector;
-        await projector.tableAdded(e.streamId, e.eventId - 1, e.payload.tables);
-    });
-}
-
-function tableRemoved(e) {
-    return Promisify(async () => {
-        const projector = dependencies.projector;
-        await projector.tableRemoved(e.streamId, e.eventId - 1, e.payload.tables);
-    });
-}
-
-function tablesAdded(e) {
-    return Promisify(async () => {
-        const projector = dependencies.projector;
-        await projector.tablesAdded(e.streamId, e.eventId - 1, e.payload.tables);
-    });
-}
-
-function tablesRemoved(e) {
-    return Promisify(async () => {
-        const projector = dependencies.projector;
-        await projector.tablesRemoved(e.streamId, e.eventId - 1, e.payload.tables);
-    });
-}
-
-/*
-function reservationCreated(e, cb) {
-    return Promisify(async () => {
-        const reservation = e.payload;
-        await dependencies.projector.reservationCreated(reservation);
-    }, cb);
-}
-
-function reservationConfirmed(e, cb) {
-    return Promisify(async () => {
-        const resId = e.payload.resId;
-        await dependencies.projector.reservationConfirmed(resId, e.eventId - 1, e.payload);
-    }, cb);
-}
-
-function reservationRejected(e, cb) {
-    return Promisify(async () => {
-        const resId = e.payload.resId;
-        const status = e.payload.status;
-        await dependencies.projector.reservationRejected(resId, e.eventId - 1, status);
-    }, cb);
-}
-
-function reservationCancelled(e, cb) {
-    return Promisify(async () => {
-        const resId = e.payload.resId;
-        const status = e.payload.status;
-        await dependencies.projector.reservationCancelled(resId, e.eventId - 1, status);
-    }, cb);
-}
-
-function restaurantReservationsCreated(e, cb) {
-    return Promisify(async () => {
-        const rr = e.payload;
-        await dependencies.projector.restaurantReservationsCreated(rr);
-    }, cb);
-}
-
-function reservationAdded(e, cb) {
-    return Promisify(async () => {
-        const restId = e.streamId;
-        const reservation = e.payload;
-        await dependencies.projector.reservationAdded(restId, e.eventId - 1, reservation);
-    }, cb);
-}
-
-function reservationRemoved(e, cb) {
-    return Promisify(async () => {
-        const restId = e.payload.restId;
-        const resId = e.payload.resId;
-        await dependencies.projector.reservationRemoved(restId, e.eventId - 1, resId);
-    }, cb);
-}
-*/
-
-const handlersMap = {
-    restaurantCreated,
-    ownerChanged,
-    tableAdded,
-    tableRemoved,
-    tablesAdded,
-    tablesRemoved,
-    /*reservationCreated,
-    reservationConfirmed,
-    reservationRejected,
-    reservationCancelled,
-    restaurantReservationsCreated,
-    reservationAdded,
-    reservationRemoved,*/
-};
 
 async function acknoledgeUtil(ackFunc, ack) {
     if (ack && typeof ackFunc === 'function') {
@@ -138,55 +110,18 @@ function dontAcknoledge(akcFunc) {
     return acknoledgeUtil(akcFunc, false);
 }
 
-async function handler(e, ack) {
-    if (!e)
-        return;
-    if (typeof handlersMap[e.message] === 'function') {
-        let lastEventId = (await dependencies.orderCtrl.getLastProcessedEvent(e.streamId)).eventId;
-        lastEventId = (lastEventId === undefined || lastEventId === null) ? 0 : lastEventId;
-
-        console.log(`Last EventId: ${lastEventId}
-        Expected EventId: ${lastEventId + 1}
-        Current EventId: ${e.eventId}`);
-        // If it is and old event
-        if (e.eventId <= lastEventId) {
-            // Removes it from the queue without processing it
-            console.log(`Current EId is lower or equals that lastEId.
-            Current event is an old event. Will be removed without processing it.`);
-            await acknoledge(ack);
-            return;
-        }
-        // If it is a too young event
-        if (e.eventId > lastEventId + 1) {
-            // Ignore it
-            console.log(`Current EId is bigger that expected EId
-            Current event is a future event. Will be ignored without removing it from queue.`);
-            console.log('Expected eventId:', lastEventId + 1, 'Found:', e.eventId);
-            await dontAcknoledge(ack);
-            return;
-        }
-
-        // If it is the next event that needs to be processed
-        if (e.eventId === lastEventId + 1) {
-            // Process it
-            console.log(`Current EId is equal the expected EId
-            Current event is the expected event. Will be processed.`);
-            await handlersMap[e.message](e);
-            await dependencies.orderCtrl.updateLastProcessedEvent(e.streamId, lastEventId, e.eventId);
-            await acknoledge(ack);
-        }
-    }
-}
+let eventHandler = null;
 
 function exportFunc(writer, orderCtrl) {
-    dependencies.projector = writer;
-    dependencies.orderCtrl = orderCtrl;
-    if (!dependencies.projector || !dependencies.orderCtrl) {
+    if (!writer || !orderCtrl) {
         throw new Error(`HandlerError: Missing one or more of the following parameters:
-        ${dependencies.projector ? '' : 'writer'}
-        ${dependencies.orderCtrl ? '' : 'orderCtrl'}`);
+        ${writer ? '' : 'writer'}
+        ${orderCtrl ? '' : 'orderCtrl'}`);
     }
-    return handler;
+    if (eventHandler && eventHandler.writer == writer && eventHandler.orderCtrl == orderCtrl)
+        return eventHandler;
+    eventHandler = new EventHandler(writer, orderCtrl);
+    return eventHandler;
 }
 
 module.exports = exportFunc;
