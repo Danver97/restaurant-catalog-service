@@ -66,6 +66,10 @@ class Writer {
         return Promisify(() => this.collection.insertOne(restaurant), cb);
     }
 
+    restaurantRemoved(restaurantId, _revisionId, cb) {
+        return Promisify(() => this.collection.deleteOne({ _id: restaurantId, _revisionId }), cb);
+    }
+
     ownerChanged(restaurantId, _revisionId, owner, cb) {
         return Promisify(
             () => this.collection.updateOne(

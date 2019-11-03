@@ -8,6 +8,10 @@ class EventHandler {
     restaurantCreated(e, cb) {
         return this.writer.restaurantCreated(e.payload, cb);
     }
+
+    restaurantRemoved(e, cb) {
+        return this.writer.restaurantRemoved(e.streamId, e.eventId - 1, cb);
+    }
     
     ownerChanged(e, cb) {
         return this.writer.ownerChanged(e.streamId, e.eventId - 1, e.payload.owner, cb);
@@ -52,6 +56,7 @@ class EventHandler {
     async handleEvent(e, ack) {
         if (!e)
             return;
+        console.log('handle event ' + e.message);
         if (typeof this[e.message] === 'function') {
             let lastEventId = (await this.orderCtrl.getLastProcessedEvent(e.streamId)).eventId;
             lastEventId = (lastEventId === undefined || lastEventId === null) ? 0 : lastEventId;

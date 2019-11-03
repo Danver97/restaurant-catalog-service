@@ -25,7 +25,7 @@ describe('writer unit test', function () {
             db: 'Reservation',
             collection: 'Reservation',
         };
-        client = new MongoClient(mongoConfig.url, { useNewUrlParser: true });
+        client = new MongoClient(mongoConfig.url, { useNewUrlParser: true, useUnifiedTopology: true });
         await client.connect();
         collection = client.db(mongoConfig.db).collection(mongoConfig.collection);
         writer = await writerFunc(mongoConfig);
@@ -195,6 +195,19 @@ describe('writer unit test', function () {
         // Assertions
         const doc = await collection.findOne({ _id: rest.restId });
         assert.deepStrictEqual(doc, toJSON(rest));
+    });
+    
+    it('check if restaurantRemoved works', async function () {
+        // Preset
+        await collection.insertOne(toJSON(rest));
+
+        // Update done
+        const e = new Event(rest.restId, 2, 'restaurantRemoved', { id: rest.restId });
+        await writer.restaurantRemoved(e.streamId, e.eventId - 1);
+
+        // Assertions
+        const doc = await collection.findOne({ _id: rest.restId });
+        assert.deepStrictEqual(doc, null);
     });
 
     after(async () => {
