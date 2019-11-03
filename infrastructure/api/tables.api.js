@@ -1,10 +1,11 @@
 const express = require('express');
 const Table = require('../../domain/models/table');
+const QueryError = require('../query/query_error');
 
 const router = express.Router();
 
 let restaurantMgr = null;
-let queryManager = null;
+let queryMgr = null;
 
 function clientError(res, message, code) {
     res.status(code || 400);
@@ -20,9 +21,20 @@ router.get('/', async (req, res) => {
         return;
     }
     try {
-        const tables = await restaurantMgr.getTables(restId);
+        const rest = await queryMgr.getRestaurant(restId);
+        const tables = rest.tables;
         res.json(tables);
     } catch (e) {
+        if (e instanceof QueryError) {
+            switch (e.code) {
+                case QueryError.paramError:
+                    clientError(res, 'Missing some paramters', 400);
+                    return;
+                case QueryError.notFound:
+                    clientError(res, 'Restaurant not found', 404);
+                    return;
+            }
+        }
         res.status(e.code || 500);
         res.json({ error: e });
     }

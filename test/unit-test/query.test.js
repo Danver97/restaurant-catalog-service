@@ -24,6 +24,10 @@ describe('query unit test', function () {
         collection = mongodb.db('Restaurant').collection('Restaurant');
     });
 
+    after(async () => {
+        await mongod.stop();
+    });
+
     beforeEach(async () => {
         await collection.deleteMany({});
     })

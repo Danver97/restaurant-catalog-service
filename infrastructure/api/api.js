@@ -11,6 +11,7 @@ const Timetable = timetableLib.Timetable;
 const DayTimetable = timetableLib.DayTimetable;
 const Menu = require('../../domain/models/menu').Menu;
 const Phone = require('../../domain/models/phone');
+const QueryError = require('../../infrastructure/query/query_error');
 
 const app = express();
 let restaurantMgr = null;
@@ -75,10 +76,20 @@ app.get('/restaurant-catalog-service/restaurants/:restId', async (req, res) => {
         return;
     }
     try {
-        const rest = await restaurantMgr.getRestaurant(params.restId);
+        const rest = await queryMgr.getRestaurant(params.restId);
         //rest.timetable = rest.timetable.toJSON();
         res.json(rest);
     } catch (e) {
+        if (e instanceof QueryError) {
+            switch (e.code) {
+                case QueryError.paramError:
+                    clientError(res, 'Missing some paramters', 400);
+                    return;
+                case QueryError.notFound:
+                    clientError(res, 'Restaurant not found', 404);
+                    return;
+            }
+        }
         res.status(e.code || 500);
         res.json({ error: e });
     }

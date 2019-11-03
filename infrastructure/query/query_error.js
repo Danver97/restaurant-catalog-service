@@ -6,7 +6,7 @@ const errorsTypes = {
         name: 'paramError',
     },
     notFound: {
-        code: 100,
+        code: 1,
         name: 'notFound',
     },
 };

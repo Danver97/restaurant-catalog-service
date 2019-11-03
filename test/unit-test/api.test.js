@@ -4,12 +4,17 @@ const request = require('supertest');
 const cloneDeep = require('lodash.clonedeep');
 const MongoClient = require('mongodb').MongoClient;
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
+const testbroker = require('@danver97/event-sourcing/eventBroker')['testbroker'];
+const BrokerEvent = require('@danver97/event-sourcing/eventBroker/brokerEvent');
 
 const repo = require('../../infrastructure/repository/repositoryManager')('testdb');
 const businessManager = require('../../domain/logic/restaurantManager')(repo);
 const queryManagerFunc = require('../../infrastructure/query');
 const appFunc = require('../../infrastructure/api/api');
 const assertStrictEqual = require('../../lib/utils').assertStrictEqual;
+const denormHandlerFunc = require('../../infrastructure/denormalizers/mongodb/handler');
+const denormWriterFunc = require('../../infrastructure/denormalizers/mongodb/writer');
+const denormOrderCtrl = require('../../infrastructure/denormalizers/mongodb/orderControl')('testdb');
 
 const menuLib = require('../../domain/models/menu');
 const Table = require('../../domain/models/table');
@@ -22,31 +27,70 @@ const Price = menuLib.Price;
 
 
 const mongod = new MongoMemoryServer();
+const dbName = 'Restaurant';
+const collectionName = 'Restaurant';
+
 let app;
 let queryMgr;
 let req;
 
+let denormWriter;
+let denormHandler;
+
+function waitAsync(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function setUpMongo() {
     const connString = await mongod.getConnectionString();
     mongodb = new MongoClient(connString, { useNewUrlParser: true, useUnifiedTopology: true });
     await mongodb.connect();
-    collection = mongodb.db('Reservation').collection('Reservation');
+    collection = mongodb.db(dbName).collection(collectionName);
 }
 async function setUpQuery() {
     const connString = await mongod.getConnectionString();
-    queryMgr = await queryManagerFunc(connString, 'Reservation', 'Reservation');
+    queryMgr = await queryManagerFunc(connString, dbName, collectionName);
+}
+async function setUpDenormalizer() {
+    const connString = await mongod.getConnectionString();
+    denormWriter = await denormWriterFunc({url: connString, db: dbName, collection: collectionName});
+    denormHandler = await denormHandlerFunc(denormWriter, denormOrderCtrl, 'warn');
+
+    await testbroker.subscribe('microservice-test');
+}
+
+async function processEvents(waitTimeout) {
+    await testbroker.getEvent({ number: 10 }, async (err, events) => {
+        if (Array.isArray(events)) {
+            for (let e of events)
+                await denormHandler.handleEvent(e, () => testbroker.destroyEvent(e));
+        }
+    });
+    await waitAsync(waitTimeout || 1); // Needed
+}
+
+function stopDenormalizer() {
+    testbroker.stopPoll();
 }
 
 describe('Integration test', function () {
 
-    before(async () => {
+    before(async function () {
+        this.timeout(20000);
         repo.reset();
         await setUpMongo();
         await setUpQuery();
+        await setUpDenormalizer();
         app = appFunc(businessManager, queryMgr);
         req = request(app);
-    })
+    });
+
+    after(async function () {
+        this.timeout(20000);
+        await waitAsync(200);
+        stopDenormalizer();
+        await mongod.stop();
+    });
     
     it('service test', async function () {
         await req.get('/restaurant-catalog-service')
@@ -73,6 +117,7 @@ describe('Integration test', function () {
                     rest.restId = res.body.restId;
                 })
                 .expect(200);
+            await processEvents();
         });
         
         it(`GET\t/restaurant-catalog-service/restaurants/${rest.restId}`, async function () {
@@ -92,6 +137,7 @@ describe('Integration test', function () {
                 .send({ restId: rest.restId })
                 .expect({ message: 'success' })
                 .expect(200);
+            await processEvents();
         });
         
         it(`GET\t/restaurant-catalog-service/restaurants/${rest.restId}`, async function () {
@@ -122,6 +168,7 @@ describe('Integration test', function () {
                     rest.restId = res.body.restId;
                 })
                 .expect(200);
+            await processEvents();
         });
         
         it(`GET\t/restaurant-catalog-service/restaurants/${rest.restId}/tables`, async function () {
@@ -140,6 +187,7 @@ describe('Integration test', function () {
                 .send(table)
                 .expect({})
                 .expect(301);
+            await processEvents();
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .expect(res => {
                     const result = res.body;
@@ -153,6 +201,7 @@ describe('Integration test', function () {
                 .send(table2)
                 .expect({})
                 .expect(301);
+            await processEvents();
         });
         
         it('DELETE\t/restaurant-catalog-service/restaurants/${rest.restId}/tables/${tableId}', async function () {
@@ -164,6 +213,8 @@ describe('Integration test', function () {
                 .set('Content-Type', 'application/json')
                 .expect({})
                 .expect(301);
+            await processEvents();
+
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .expect(res => {
                     const result = res.body;
@@ -180,6 +231,8 @@ describe('Integration test', function () {
                 .send([table, table2])
                 .expect({})
                 .expect(301);
+            await processEvents();
+
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/tables`)
                 .expect(res => {
                     const result = res.body;
@@ -206,6 +259,7 @@ describe('Integration test', function () {
                 .send({ timetable: defaultTimetable2.toJSON() })
                 .expect({})
                 .expect(200);
+            await processEvents();
             
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}`)
                 .expect(res => {
@@ -245,6 +299,7 @@ describe('Integration test', function () {
                 .set('Content-Type', 'application/json')
                 .send({ menuSection })
                 .expect(400);
+            await processEvents();
 
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
                 .expect(res => {
@@ -273,6 +328,7 @@ describe('Integration test', function () {
                 .set('Content-Type', 'application/json')
                 .send({ dish })
                 .expect(200);
+            await processEvents();
 
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
                 .expect(res => {
@@ -302,6 +358,7 @@ describe('Integration test', function () {
                 .set('Content-Type', 'application/json')
                 .send({ dish: dish_v2 })
                 .expect(200);
+            await processEvents();
 
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
                 .expect(res => {
@@ -325,6 +382,7 @@ describe('Integration test', function () {
             await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}/dishes/${dish_v2.name}`)
                 .set('Content-Type', 'application/json')
                 .expect(200);
+            await processEvents();
 
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
                 .expect(res => {
@@ -346,6 +404,7 @@ describe('Integration test', function () {
             await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections/${menuSection.name}`)
                 .set('Content-Type', 'application/json')
                 .expect(200);
+            await processEvents();
 
             await req.get(`/restaurant-catalog-service/restaurants/${rest.restId}/menu`)
                 .expect(res => {

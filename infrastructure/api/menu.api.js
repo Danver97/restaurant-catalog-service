@@ -1,6 +1,7 @@
 const express = require('express');
 const menuLib = require('../../domain/models/menu');
 const MenuError = require('../../domain/errors/menu.error');
+const QueryError = require('../query/query_error');
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ const Dish = menuLib.Dish;
 const Price = menuLib.Price;
 
 let restaurantMgr = null;
-let queryManager = null;
+let queryMgr = null;
 
 function emptyResponse(res, code) {
     res.status(code || 200);
@@ -29,9 +30,19 @@ router.get('/', async (req, res) => {
         return;
     }
     try {
-        const rest = await restaurantMgr.getRestaurant(restId);
+        const rest = await queryMgr.getRestaurant(restId);
         res.json(rest.menu);
     } catch (e) {
+        if (e instanceof QueryError) {
+            switch (e.code) {
+                case QueryError.paramError:
+                    clientError(res, 'Missing some paramters', 400);
+                    return;
+                case QueryError.notFound:
+                    clientError(res, 'Restaurant not found', 404);
+                    return;
+            }
+        }
         res.status(e.code || 500);
         res.json({ error: e });
     }
