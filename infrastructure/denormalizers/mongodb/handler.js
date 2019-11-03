@@ -1,7 +1,8 @@
 class EventHandler {
-    constructor(writer, orderCtrl) {
+    constructor(writer, orderCtrl, logLevel) {
         this.writer = writer;
         this.orderCtrl = orderCtrl;
+        this.logLevel = logLevel;
 
     }
 
@@ -53,21 +54,32 @@ class EventHandler {
         return this.writer.dishUpdated(e.streamId, e.eventId - 1, e.payload.menu, cb);
     }
 
+    log(type, msg) {
+        const types = {
+            info: 0,
+            log: 1,
+            warn: 2,
+            err: 3,
+        };
+        if (types[type] < types[this.logLevel])
+            return;
+        console[type](msg);
+    }
+
     async handleEvent(e, ack) {
         if (!e)
             return;
-        console.log('handle event ' + e.message);
         if (typeof this[e.message] === 'function') {
             let lastEventId = (await this.orderCtrl.getLastProcessedEvent(e.streamId)).eventId;
             lastEventId = (lastEventId === undefined || lastEventId === null) ? 0 : lastEventId;
     
-            console.log(`Last EventId: ${lastEventId}
+            this.log('log', `Last EventId: ${lastEventId}
             Expected EventId: ${lastEventId + 1}
             Current EventId: ${e.eventId}`);
             // If it is and old event
             if (e.eventId <= lastEventId) {
                 // Removes it from the queue without processing it
-                console.log(`Current EId is lower or equals that lastEId.
+                this.log('warn', `Current EId is lower or equals that lastEId.
                 Current event is an old event. Will be removed without processing it.`);
                 await acknoledge(ack);
                 return;
@@ -75,9 +87,9 @@ class EventHandler {
             // If it is a too young event
             if (e.eventId > lastEventId + 1) {
                 // Ignore it
-                console.log(`Current EId is bigger that expected EId
+                this.log('warn', `Current EId is bigger that expected EId
                 Current event is a future event. Will be ignored without removing it from queue.`);
-                console.log('Expected eventId:', lastEventId + 1, 'Found:', e.eventId);
+                this.log('log', 'Expected eventId:', lastEventId + 1, 'Found:', e.eventId);
                 await dontAcknoledge(ack);
                 return;
             }
@@ -85,7 +97,7 @@ class EventHandler {
             // If it is the next event that needs to be processed
             if (e.eventId === lastEventId + 1) {
                 // Process it
-                console.log(`Current EId is equal the expected EId
+                this.log('log', `Current EId is equal the expected EId
                 Current event is the expected event. Will be processed.`);
                 await this[e.message](e);
                 await this.orderCtrl.updateLastProcessedEvent(e.streamId, lastEventId, e.eventId);
@@ -117,15 +129,15 @@ function dontAcknoledge(akcFunc) {
 
 let eventHandler = null;
 
-function exportFunc(writer, orderCtrl) {
+function exportFunc(writer, orderCtrl, logLevel) {
     if (!writer || !orderCtrl) {
         throw new Error(`HandlerError: Missing one or more of the following parameters:
         ${writer ? '' : 'writer'}
         ${orderCtrl ? '' : 'orderCtrl'}`);
     }
-    if (eventHandler && eventHandler.writer == writer && eventHandler.orderCtrl == orderCtrl)
+    if (eventHandler && eventHandler.writer == writer && eventHandler.orderCtrl == orderCtrl && eventHandler.logLevel == logLevel)
         return eventHandler;
-    eventHandler = new EventHandler(writer, orderCtrl);
+    eventHandler = new EventHandler(writer, orderCtrl, logLevel);
     return eventHandler;
 }
 
