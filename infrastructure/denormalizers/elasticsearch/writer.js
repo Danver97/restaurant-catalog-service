@@ -1,29 +1,26 @@
-const mongodb = require('mongodb');
+const ESClient = require('@elastic/elasticsearch').Client;
 const Promisify = require('promisify-cb');
 const writerFunc = require('./writer');
 
 let writer = null;
 
 class Writer {
-    constructor(url, dbName, collectionName) {
-        if (!url || !dbName || !collectionName) {
+    constructor(url, indexName) {
+        if (!url || !indexName) {
             throw new Error(`WriterError: missing one of the following parameter in the constructor:
             ${url ? '' : 'url'}
-            ${dbName ? '' : 'dbName'}
-            ${collectionName ? '' : 'collectionName'}`);
+            ${indexName ? '' : 'indexName'}`);
         }
         this.url = url;
-        this.dbName = dbName;
-        this.collectionName = collectionName;
-        // useUnifiedTopology: true necessario per mongodb by Bitnami. Not sure if really necessary.
-        this.client = new mongodb.MongoClient(this.url, { useNewUrlParser: true, useUnifiedTopology: true });
+        this.indexName = indexName;
+        this.client = new ESClient({ node: this.url });
     }
 
     async connect() {
         if (this.client.isConnected())
             return;
         await this.client.connect();
-        this.db = this.client.db(this.dbName);
+        this.db = this.client.db(this.indexName);
         this.collection = this.db.collection(this.collectionName);
     }
 
@@ -63,6 +60,14 @@ class Writer {
     restaurantCreated(restaurant, cb) {
         restaurant._id = restaurant.restId || restaurant.id;
         restaurant._revisionId = 1;
+        /*
+        this.client.index({
+            index: this.indexName,
+            body: restaurant,
+            // refresh: 'wait_for',
+        });
+        */
+
         return Promisify(() => this.collection.insertOne(restaurant), cb);
     }
 
@@ -148,18 +153,17 @@ class Writer {
 /**
  * Export function for the writer singleton object
  * @param {object} options Export function options
- * @param {object} options.url Url string for the mongodb instance
- * @param {object} options.db Db name of the db
- * @param {object} options.collection Collection name of the db's collection to write to
+ * @param {object} options.url Url string for the ElasticSearch instance
+ * @param {object} options.indexName Index name of ElasticSearch
  */
 async function exportFunc(options) {
     function areSameOptions(options) {
-        return options.url === writer.url && options.db === writer.dbName && options.collection === writer.collectionName;
+        return options.url === writer.url && options.indexName === writer.indexName;
     }
 
     if (!options || (writer && writer.isConnected && areSameOptions(options)))
         return writer;
-    writer = new Writer(options.url, options.db, options.collection);
+    writer = new Writer(options.url, options.indexName);
     await writer.connect();
     return writer;
 }
