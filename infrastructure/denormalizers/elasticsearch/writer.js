@@ -1,6 +1,5 @@
 const ESClient = require('@elastic/elasticsearch').Client;
 const Promisify = require('promisify-cb');
-const writerFunc = require('./writer');
 
 let writer = null;
 
@@ -58,31 +57,29 @@ class Writer {
     // Write handlers
 
     restaurantCreated(restaurant, cb) {
-        restaurant._id = restaurant.restId || restaurant.id;
-        restaurant._revisionId = 1;
-        /*
-        this.client.index({
+        const id = restaurant.restId || restaurant.id;
+        const revisionId = 1;
+        return Promisify(() => this.client.index({
             index: this.indexName,
+            id,
             body: restaurant,
-            // refresh: 'wait_for',
-        });
-        */
-
-        return Promisify(() => this.collection.insertOne(restaurant), cb);
+            version: revisionId,
+            version_type: 'external',
+        }), cb);
     }
 
     restaurantRemoved(restaurantId, _revisionId, cb) {
-        return Promisify(() => this.collection.deleteOne({ _id: restaurantId, _revisionId }), cb);
+        return Promisify(() => this.client.delete({ index: this.indexName, id: restaurantId }), cb);
     }
 
     ownerChanged(restaurantId, _revisionId, owner, cb) {
-        return Promisify(
-            () => this.collection.updateOne(
-                { _id: restaurantId, _revisionId },
-                { $set: { owner }, $inc: { _revisionId: 1 } },
-            ),
-            cb,
-        );
+        return Promisify(() => this.client.update({
+            index: this.indexName,
+            id: restaurantId,
+            body: { doc: {
+                owner
+            } }
+        }), cb);
     }
     
     tableAdded(restaurantId, _revisionId, tables, cb) {
@@ -94,33 +91,33 @@ class Writer {
     }
     
     tablesChanged(restaurantId, _revisionId, tables, cb) {
-        return Promisify(
-            () => this.collection.updateOne(
-                { _id: restaurantId, _revisionId },
-                { $set: { tables }, $inc: { _revisionId: 1 } },
-            ),
-            cb,
-        );
+        return Promisify(() => this.client.update({
+            index: this.indexName,
+            id: restaurantId,
+            body: { doc: {
+                tables
+            } }
+        }), cb);
     }
 
     timetableChanged(restaurantId, _revisionId, timetable, cb) {
-        return Promisify(
-            () => this.collection.updateOne(
-                { _id: restaurantId, _revisionId },
-                { $set: { timetable }, $inc: { _revisionId: 1 } },
-            ),
-            cb,
-        );
+        return Promisify(() => this.client.update({
+            index: this.indexName,
+            id: restaurantId,
+            body: { doc: {
+                timetable
+            } }
+        }), cb);
     }
 
     menuChanged(restaurantId, _revisionId, menu, cb) {
-        return Promisify(
-            () => this.collection.updateOne(
-                { _id: restaurantId, _revisionId },
-                { $set: { menu }, $inc: { _revisionId: 1 } },
-            ),
-            cb,
-        );
+        return Promisify(() => this.client.update({
+            index: this.indexName,
+            id: restaurantId,
+            body: { doc: {
+                menu
+            } }
+        }), cb);
     }
 
     menuSectionAdded(restaurantId, _revisionId, menu, cb) {
