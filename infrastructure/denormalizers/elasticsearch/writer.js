@@ -16,27 +16,23 @@ class Writer {
     }
 
     async connect() {
-        if (this.client.isConnected())
-            return;
-        await this.client.connect();
-        this.db = this.client.db(this.indexName);
-        this.collection = this.db.collection(this.collectionName);
+        return;
     }
 
     get isConnected() {
-        return this.client.isConnected();
+        return true;
     }
 
     closeConnection() {
-        return this.client.close();
+        return;
     }
 
     async close() {
-        await this.closeConnection();
+        return;
     }
 
     async disconnect() {
-        await this.closeConnection();
+        return;
     }
 
     /**
@@ -63,8 +59,6 @@ class Writer {
             index: this.indexName,
             id,
             body: restaurant,
-            version: revisionId,
-            version_type: 'external',
         }), cb);
     }
 
@@ -90,13 +84,17 @@ class Writer {
         return this.tablesChanged(restaurantId, _revisionId, tables, cb);
     }
     
-    tablesChanged(restaurantId, _revisionId, tables, cb) {
+    tablesChanged(restaurantId, _revisionId, tables, cb) {        
         return Promisify(() => this.client.update({
             index: this.indexName,
             id: restaurantId,
             body: { doc: {
                 tables
             } }
+            /* body: { script: {
+                source: "ctx._source.tables = params.tables",
+                params: { tables },
+            } } */
         }), cb);
     }
 
