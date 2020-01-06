@@ -30,6 +30,19 @@ describe('handler unit test', function () {
         rest = utils.restaurant();
         await orderControl.db.reset();
     });
+    
+    afterEach(async () => {
+        try {
+            await client.delete(rest.restId);
+        } catch (error) {
+            if (error.body.result == 'not_found')
+                console.log('not_found');
+            else {
+                console.log(error.body);
+                throw error;
+            }
+        }
+    });
 
     it('check if restaurantCreated event is handled properly', async function () {
         // Update done
