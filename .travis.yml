@@ -8,6 +8,7 @@ jobs:
     - stage: Test
       before_install:
         - docker run -d -p 9200:9200 -e "discovery.type=single-node" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" --name es751 elasticsearch:7.5.1
+        - sleep 30
         - docker ps
       script:
         - npm test
