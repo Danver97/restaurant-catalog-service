@@ -2,7 +2,7 @@ class EventHandler {
     constructor(writer, orderCtrl, logLevel) {
         this.writer = writer;
         this.orderCtrl = orderCtrl;
-        this.logLevel = logLevel;
+        this.logLevel = logLevel || 'warn';
 
     }
 
