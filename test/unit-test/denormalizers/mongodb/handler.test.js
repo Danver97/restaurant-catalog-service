@@ -27,7 +27,7 @@ describe('handler unit test', function () {
             db: 'Reservation',
             collection: 'Reservation',
         };
-        client = new MongoClient(mongoConfig.url, { useNewUrlParser: true });
+        client = new MongoClient(mongoConfig.url, { useNewUrlParser: true, useUnifiedTopology: true });
         await client.connect();
         collection = client.db(mongoConfig.db).collection(mongoConfig.collection);
         writer = await writerFunc(mongoConfig);
