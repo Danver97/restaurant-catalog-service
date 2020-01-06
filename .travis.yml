@@ -1,11 +1,19 @@
 language: node_js
 node_js:
 - '10'
+services:
+  - docker
 jobs:
   include:
     - stage: Test
+      before_install:
+        - docker run -d -p 9200:9200 -e "discovery.type=single-node" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" --name es751 elasticsearch:7.5.1
+        - docker ps
       script:
         - npm test
+      after_script:
+        - docker stop es751
+        - docker rm es751
 
     - stage: Release
       if: branch = master AND type != pull_request
