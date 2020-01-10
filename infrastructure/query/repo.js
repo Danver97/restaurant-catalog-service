@@ -18,7 +18,7 @@ function nearme(options = {}, cb) {
     return Promisify(async () => {
         let coordinates = options.coordinates;
         if (!coordinates)
-            throw new QueryError('Maps API not supported yet. Please specify option.coordinates');
+            throw new QueryError('Maps API not supported yet. Please specify option.coordinates', QueryError.paramError);
             // coordinates = await maps.geocode({ address }).asPromise();
         let res = await es.client.search({
             index: es.index,
