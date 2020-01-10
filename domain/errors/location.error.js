@@ -18,11 +18,19 @@ class LocationError extends ExtendableError {
     }
 
     static paramError(msg) {
-        return new LocationError(msg, MenuError.paramErrorCode);
+        return new LocationError(msg, LocationError.paramErrorCode);
     }
 
     static coordinatesOutOfBounds(msg) {
-        return new LocationError(msg, MenuError.coordinatesOutOfBounds);
+        return new LocationError(msg, LocationError.coordinatesOutOfBoundsCode);
+    }
+
+    static get paramErrorCode() {
+        return errorsTypes.paramError.code;
+    }
+
+    static get coordinatesOutOfBoundsCode() {
+        return errorsTypes.coordinatesOutOfBounds.code;
     }
 }
 

@@ -14,7 +14,7 @@ describe('Menu module unit test', () => {
         assert.throws(() => new Location(), LocationError);
         assert.throws(() => new Location('a'), LocationError);
         assert.throws(() => new Location(coords), LocationError);
-        assert.throws(() => new Price(coords, 3), LocationError);
+        assert.throws(() => new Location(coords, 3), LocationError);
         assert.throws(() => new Location({ lat: 98.0, lon: 44.0 }, 'aaa'), LocationError);
         assert.throws(() => new Location({ lat: 12.0, lon: 270.0 }, 'aaa'), LocationError);
 
