@@ -11,6 +11,10 @@ class Location {
         this.address = address;
     }
 
+    static fromObject(obj = {}) {
+        return new Location(obj.coordinates, obj.address);
+    }
+
     static checkCoordinatesValidity(coordinates) {
         if (typeof coordinates !== 'object' || (typeof coordinates === 'object' && (!coordinates.lat || !coordinates.lon)))
             throw LocationError.paramError(`coordinates must be an object with the following properties:

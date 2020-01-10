@@ -40,8 +40,12 @@ class Restaurant {
             rest.addTables(obj.tables.map(t => Table.fromObject(t)));
         const classKeys = ['restId', 'restaurantName', 'owner', 'tables', 'timetable', 'menu', 'telephone'];
         Object.keys(obj).forEach(k => {
-            if (!classKeys.includes(k))
-                rest[k] = obj[k];
+            if (!classKeys.includes(k)) {
+                if (k === 'location')
+                    rest.setLocation(Location.fromObject(obj[k]));
+                else
+                    rest[k] = obj[k];
+            }
         });
         return rest;
     }
