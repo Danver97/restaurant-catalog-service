@@ -60,6 +60,13 @@ function timetableChanged(rest, timetable, cb) {
     }, cb);
 }
 
+function locationChanged(rest, location, cb) {
+    return Promisify(async () => {
+        await this.save(rest.restId, rest._revisionId, restaurantEvents.locationChanged, { id: rest.restId, location });
+        if (rest._revisionId) rest._revisionId++;
+    }, cb);
+}
+
 function menuSectionAdded(rest, menu, cb) {
     return Promisify(async () => {
         await this.save(rest.restId, rest._revisionId, restaurantEvents.menuSectionAdded, { id: rest.restId, menu });
@@ -96,6 +103,8 @@ function dishUpdated(rest, menu, cb) {
 }
 
 function getRestaurant(restId, cb) {
+    if (!restId)
+        throw new RepositoryError('Missing the following parameter: restId');
     return Promisify(async () => {
         const stream = await this.getStream(restId);
         let aggregate = {};
@@ -121,6 +130,8 @@ function decorate(db) {
         tablesChanged: tablesChanged.bind(db),
 
         timetableChanged: timetableChanged.bind(db),
+
+        locationChanged: locationChanged.bind(db),
 
         menuSectionAdded: menuSectionAdded.bind(db),
         menuSectionRemoved: menuSectionRemoved.bind(db),
