@@ -2,6 +2,7 @@ const RestaurantError = require('../errors/restaurant.error');
 const Table = require('./table');
 const Phone = require('./phone');
 const Review = require('./review');
+const Location = require('./location');
 const Timetable = require('./timetable').Timetable;
 const Menu = require('./menu').Menu;
 const checker = require('../../lib/checkers');
@@ -49,6 +50,12 @@ class Restaurant {
         if (!timetable) throw new RestaurantError('Missing the following parameter: timetable');
         if (!(timetable instanceof Timetable)) throw new RestaurantError('timetable is not a instance of Timetable');
         this.timetable = timetable;
+    }
+
+    setLocation(location) {
+        if (!location) throw new RestaurantError('Missing the following parameter: location');
+        if (!(location instanceof Location)) throw new RestaurantError('location is not a instance of Location');
+        this.location = location;
     }
 
     addTable(table) {

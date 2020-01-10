@@ -2,6 +2,7 @@ const uuid = require('uuid/v4');
 const Table = require('../../../domain/models/table');
 const menuLib = require('../../../domain/models/menu');
 const timetableLib = require('../../../domain/models/timetable');
+const Location = require('../../../domain/models/location');
 const Phone = require('../../../domain/models/phone');
 const Restaurant = require('../../../domain/models/restaurant');
 
@@ -121,6 +122,14 @@ defaultTimetable.setDays(days);
 const defaultTimetable2 = new Timetable();
 defaultTimetable2.setDays(days2);
 
+// Location
+const coords = {
+    lat: 44.021651,
+    lon: 7.021651,
+};
+const address = 'via Roma 1, Fossano, Italia';
+const defaultLocation = new Location(coords, address);
+
 // Phone
 const defaultPhone = new Phone('+390172694784');
 
@@ -139,6 +148,7 @@ module.exports = {
     defaultMenu3,
     defaultTimetable,
     defaultTimetable2,
+    defaultLocation,
     defaultPhone,
     restaurant
 };

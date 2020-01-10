@@ -93,6 +93,17 @@ describe('Restaurant class unit test', function () {
 
         assert.deepStrictEqual(rest.timetable, timetable2);
     });
+    it('check if setLocation() works properly', function () {
+        const rest = new Restaurant(1, name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
+        assert.throws(() => rest.setLocation(), RestaurantError);
+        assert.throws(() => rest.setLocation({}), RestaurantError);
+        
+        const location = lib.defaultLocation;
+
+        rest.setLocation(location);
+
+        assert.deepStrictEqual(rest.location, location);
+    });
     it('check fromObject() works', () => {
         const rest = new Restaurant(1, name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
         const obj = JSON.parse(JSON.stringify(rest));
