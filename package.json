@@ -13,6 +13,7 @@
   "dependencies": {
     "@danver97/event-sourcing": "^2.1.5",
     "@elastic/elasticsearch": "^7.4.0",
+    "@google/maps": "^1.0.2",
     "aws-sdk": "^2.333.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",

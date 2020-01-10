@@ -1,16 +1,48 @@
 const MongoClient = require('mongodb').MongoClient;
+const ESClient = require('@elastic/elasticsearch').Client;
 const QueryError = require('./query_error');
 const repoFunc = require('./repo');
 
 let mongo;
+let esClient;
 
-async function exportFunc(mongoConnString, dbName, collectionName) {
-    console.log(mongoConnString);
-    if (!mongoConnString)
-        throw new QueryError(`Missing the following parameters:${mongoConnString ? '' : ' mongoConnString'}`, QueryError.paramError);
-    mongo = new MongoClient(mongoConnString, { useNewUrlParser: true, useUnifiedTopology: true });
+function checkParameters(mongoOptions, esOptions) {
+    const errorStr = 'Missing the following parameters:';
+    let throwError = false;
+    if (!mongoOptions.connString) {
+        throwError = true;
+        errorStr += ' mongoOptions.connString';
+    }
+    if (!mongoOptions.dbName) {
+        throwError = true;
+        errorStr += ' mongoOptions.dbName';
+    }
+    if (!mongoOptions.collectionName) {
+        throwError = true;
+        errorStr += ' mongoOptions.collectionName';
+    }
+    
+    if (!esOptions.url) {
+        throwError = true;
+        errorStr += ' esOptions.url';
+    }
+    if (!esOptions.index) {
+        throwError = true;
+        errorStr += ' esOptions.index';
+    }
+
+    if (throwError)
+        throw new QueryError(errorStr, QueryError.paramError);
+}
+
+async function exportFunc(mongoOptions = {}, esOptions = {}) {
+    console.log(mongoOptions.connString);
+    checkParameters(mongoOptions, esOptions);
+    mongo = new MongoClient(mongoOptions.connString, { useNewUrlParser: true, useUnifiedTopology: true });
     await mongo.connect();
-    return repoFunc(mongo.db(dbName).collection(collectionName));
+    esClient = new ESClient({ node: esOptions.url });
+    mongoCollection = mongo.db(mongoOptions.dbName).collection(mongoOptions.collectionName);
+    return repoFunc(mongoCollection, { client: esClient, index: esOptions.index });
 }
 
 module.exports = exportFunc;
