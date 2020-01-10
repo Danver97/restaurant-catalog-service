@@ -154,6 +154,20 @@ describe('Restaurant Manager unit test', function () {
         equals(result, rest);
     });
     
+    it('check if locationChanged() works properly', async function () {
+        const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);
+        let result = await restMgr.restaurantCreated(rest);
+        
+        await waitAsync(waitAsyncTimeout);
+        const location = lib.defaultLocation;
+        rest.setLocation(location);
+        result = await restMgr.locationChanged(rest.restId, location);
+        
+        await waitAsync(waitAsyncTimeout);
+        result = await restMgr.getRestaurant(rest.restId);
+        equals(result, rest);
+    });
+    
     it('check if menuSectionAdded() works properly', async function () {
         const menu = Menu.fromObject(JSON.parse(JSON.stringify(lib.defaultMenu)));
         const rest = new Restaurant(uuid(), name, owner, timetable, menu, telephone);

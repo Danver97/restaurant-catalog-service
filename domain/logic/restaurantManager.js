@@ -144,6 +144,21 @@ class RestaurantManager {
         });
     }
 
+    locationChanged(restId, location, cb) {
+        const dbmanager = this.db;
+        return new Promise(async (resolve, reject) => {
+            try {
+                checker.checkRestId(restId);
+                let rest = await dbmanager.getRestaurant(restId);
+                rest.setLocation(location);
+                await dbmanager.locationChanged(rest, rest.location, cb);
+                resolve(rest);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     menuSectionAdded(restId, menuSection, cb) {
         const dbmanager = this.db;
         return new Promise(async (resolve, reject) => {
