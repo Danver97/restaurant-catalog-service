@@ -5,30 +5,22 @@ const QueryError = require('./query_error');
 
 let mongoCollection = null;
 let es = null;
-let maps = null;
 
 function nearme(options = {}, cb) {
-    if (!options.distance)
-        throw new QueryError(`Missing the following parameter: 'options.distance'`, QueryError.paramError);
-    if (!options.address && !options.coordinates)
-        throw new QueryError(`At least one of the following parameters are required: 'options.address', 'options.coordinates'`, QueryError.paramError);
+    let distance = options.distance;
+    let coordinates = options.coordinates;
+    if (!distance || !coordinates)
+        throw new QueryError(`Missing the following parameter:${distance ? '' : 'options.distance'}${coordinates ? '' : 'options.coordinates'}`, QueryError.paramError);
     
-    if (options.coordinates)
-        try { Location.checkCoordinatesValidity(options.coordinates); } catch (e) { throw new QueryError(e.msg, QueryError.paramError); }
+    if (coordinates)
+        try { Location.checkCoordinatesValidity(coordinates); } catch (e) { throw new QueryError(e.msg, QueryError.paramError); }
     return Promisify(async () => {
-        let coordinates = options.coordinates;
-        if (!coordinates)
-            throw new QueryError('Maps API not supported yet. Please specify option.coordinates', QueryError.paramError);
-            // coordinates = await maps.geocode({ address }).asPromise();
         let res = await es.client.search({
             index: es.index,
             body: { query: {
                 geo_distance: {
-                    distance: options.distance,
-                    'location.coordinates': {
-                        lat: coordinates.lat,
-                        lon: coordinates.lon
-                    }
+                    distance,
+                    'location.coordinates': coordinates,
                 }
             } }
         });
@@ -48,13 +40,12 @@ function getRestaurant(restId, cb) {
     }, cb);
 }
 
-function exportFunc(mongodbCollection, esOptions = {}, mapsAPIClient) {
+function exportFunc(mongodbCollection, esOptions = {}) {
     if (!mongodbCollection || !esOptions.client || !esOptions.index)
         throw new QueryError(`Missing the following parameters:
         ${mongodbCollection ? '' : ' mongodbCollection'}${esOptions.client ? '' : ' esOptions.client'}${esOptions.index ? '' : ' esOptions.index'}`, QueryError.paramError);
     mongoCollection = mongodbCollection;
     es = esOptions;
-    maps = mapsAPIClient;
     return {
         nearme,
         getRestaurant,
