@@ -108,7 +108,8 @@ describe('query unit test', function () {
                 lon: 7.021651,
             },
         };
-        const docs = await query.nearme(options);
+        const res = await query.nearme(options);
+        const docs = res.docs;
         assert.deepStrictEqual(docs[0], rest);
     });
 });

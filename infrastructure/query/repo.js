@@ -7,16 +7,21 @@ let mongoCollection = null;
 let es = null;
 
 function nearme(options = {}, cb) {
+    let offset = options.offset || 0;
     let distance = options.distance;
     let coordinates = options.coordinates;
     if (!distance || !coordinates)
         throw new QueryError(`Missing the following parameter:${distance ? '' : 'options.distance'}${coordinates ? '' : 'options.coordinates'}`, QueryError.paramError);
+    if (typeof offset !== 'number')
+        throw new QueryError(`Parameter type error: 'offset' must be an integer`, QueryError.paramError);
     
     if (coordinates)
         try { Location.checkCoordinatesValidity(coordinates); } catch (e) { throw new QueryError(e.msg, QueryError.paramError); }
     return Promisify(async () => {
         let res = await es.client.search({
             index: es.index,
+            from: offset,
+            size: 20,
             body: { query: {
                 geo_distance: {
                     distance,
@@ -24,8 +29,12 @@ function nearme(options = {}, cb) {
                 }
             } }
         });
-        docs = res.body.hits.hits.map(d => d._source);
-        return docs.map(d => Restaurant.fromObject(d));
+        docs = res.body.hits.hits.map(d => d._source).map(d => Restaurant.fromObject(d));
+        return {
+            offset,
+            hits: res.body.hits.total.value,
+            docs,
+        };
     }, cb);
 }
 
