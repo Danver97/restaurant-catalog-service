@@ -34,6 +34,7 @@ function nearme(options = {}, cb) {
             offset,
             hits: res.body.hits.total.value,
             docs,
+            took: res.body.took,
         };
     }, cb);
 }
