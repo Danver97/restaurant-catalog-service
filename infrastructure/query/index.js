@@ -7,7 +7,7 @@ let mongo;
 let esClient;
 
 function checkParameters(mongoOptions, esOptions) {
-    const errorStr = 'Missing the following parameters:';
+    let errorStr = 'Missing the following parameters:';
     let throwError = false;
     if (!mongoOptions.connString) {
         throwError = true;
