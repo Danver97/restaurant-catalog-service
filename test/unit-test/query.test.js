@@ -103,10 +103,7 @@ describe('query unit test', function () {
 
         const options = {
             distance: 500,
-            coordinates: {
-                lat: 44.021651,
-                lon: 7.021651,
-            },
+            coordinates: utils.defaultLocation.coordinates,
         };
         const res = await query.nearme(options);
         const docs = res.docs;
