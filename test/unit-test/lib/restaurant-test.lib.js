@@ -124,10 +124,10 @@ defaultTimetable2.setDays(days2);
 
 // Location
 const coords = {
-    lat: 44.021651,
-    lon: 7.021651,
+    lat: 44.5514468,
+    lon: 7.7231257,
 };
-const address = 'via Roma 1, Fossano, Italia';
+const address = 'via Roma 15, Fossano, Italia';
 const defaultLocation = new Location(coords, address);
 
 // Phone

@@ -2,6 +2,7 @@ const assert = require('assert');
 const uuid = require('uuid/v4');
 const request = require('supertest');
 const cloneDeep = require('lodash.clonedeep');
+const ESClient = require('@elastic/elasticsearch').Client;
 const MongoClient = require('mongodb').MongoClient;
 const MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
 const testbroker = require('@danver97/event-sourcing/eventBroker')['testbroker'];
@@ -12,14 +13,18 @@ const businessManager = require('../../domain/logic/restaurantManager')(repo);
 const queryManagerFunc = require('../../infrastructure/query');
 const appFunc = require('../../infrastructure/api/api');
 const assertStrictEqual = require('../../lib/utils').assertStrictEqual;
-const denormHandlerFunc = require('../../infrastructure/denormalizers/mongodb/handler');
-const denormWriterFunc = require('../../infrastructure/denormalizers/mongodb/writer');
-const denormOrderCtrl = require('../../infrastructure/denormalizers/mongodb/orderControl')('testdb');
+const dMongoHandlerFunc = require('../../infrastructure/denormalizers/mongodb/handler');
+const dMongoWriterFunc = require('../../infrastructure/denormalizers/mongodb/writer');
+const dMongoOrderCtrl = require('../../infrastructure/denormalizers/mongodb/orderControl')('testdb');
+const dESHandlerFunc = require('../../infrastructure/denormalizers/elasticsearch/handler');
+const dESWriterFunc = require('../../infrastructure/denormalizers/elasticsearch/writer');
+const dESOrderCtrl = require('../../infrastructure/denormalizers/elasticsearch/orderControl')('testdb');
 
 const menuLib = require('../../domain/models/menu');
 const Table = require('../../domain/models/table');
 const Restaurant = require('../../domain/models/restaurant');
 const lib = require('./lib/restaurant-test.lib');
+const apilib = require('./lib/api.lib');
 
 const MenuSection = menuLib.MenuSection;
 const Dish = menuLib.Dish;
@@ -27,50 +32,99 @@ const Price = menuLib.Price;
 
 
 const mongod = new MongoMemoryServer();
-const dbName = 'Restaurant';
-const collectionName = 'Restaurant';
+const mongoOptions = {
+    dbName: 'Restaurant',
+    collectionName: 'Restaurant',
+};
+let esClient;
+const esOptions = {    
+    url: 'http://localhost:9200',
+    index: 'api_test',
+}
 
 let app;
 let queryMgr;
 let req;
 
-let denormWriter;
-let denormHandler;
+let dMongoWriter;
+let dMongoHandler;
+let dESWriter;
+let dESHandler;
+
+let handlersLogLevel = 'warn';
 
 function waitAsync(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function setUpMongo() {
-    const connString = await mongod.getConnectionString();
-    mongodb = new MongoClient(connString, { useNewUrlParser: true, useUnifiedTopology: true });
+async function setUpMongoClient() {
+    const mongodb = new MongoClient(mongoOptions.connString, { useNewUrlParser: true, useUnifiedTopology: true });
     await mongodb.connect();
-    collection = mongodb.db(dbName).collection(collectionName);
+    collection = mongodb.db(mongoOptions.dbName).collection(mongoOptions.collectionName);
+}
+async function setUpESClient(geoMappedProperty) {
+    esClient = new ESClient({ node: esOptions.url });
+    try {
+        await esClient.indices.create({
+            index: esOptions.index,
+            body: {
+                mappings: {
+                    properties: {
+                        [geoMappedProperty]: {
+                            type: "geo_point"
+                        }
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        if (e.body.error.type === 'resource_already_exists_exception')
+            console.log('Before: index already exists');
+        else
+            throw e;
+    }
 }
 async function setUpQuery() {
-    const connString = await mongod.getConnectionString();
-    queryMgr = await queryManagerFunc(connString, dbName, collectionName);
+    queryMgr = await queryManagerFunc(mongoOptions, esOptions);
 }
 async function setUpDenormalizer() {
-    const connString = await mongod.getConnectionString();
-    denormWriter = await denormWriterFunc({url: connString, db: dbName, collection: collectionName});
-    denormHandler = await denormHandlerFunc(denormWriter, denormOrderCtrl, 'warn');
+    dMongoWriter = await dMongoWriterFunc({ url: mongoOptions.connString, db: mongoOptions.dbName, collection: mongoOptions.collectionName });
+    dMongoHandler = await dMongoHandlerFunc(dMongoWriter, dMongoOrderCtrl, handlersLogLevel);
+    dESWriter = await dESWriterFunc({ url: esOptions.url, indexName: esOptions.index });
+    dESHandler = await dESHandlerFunc(dESWriter, dESOrderCtrl, handlersLogLevel);
 
     await testbroker.subscribe('microservice-test');
 }
 
-async function processEvents(waitTimeout) {
-    await testbroker.getEvent({ number: 10 }, async (err, events) => {
-        if (Array.isArray(events)) {
-            for (let e of events)
-                await denormHandler.handleEvent(e, () => testbroker.destroyEvent(e));
+async function processEvents() {
+    let events = await testbroker.getEvent({ number: 10 });
+    if (Array.isArray(events)) {
+        events = events.filter(e => e !== undefined);
+        for (let e of events) {
+            let mongoEvent = BrokerEvent.fromObject(e);
+            mongoEvent.payload = Object.assign({}, e.payload);
+            let esEvent = BrokerEvent.fromObject(e);
+            esEvent.payload = Object.assign({}, e.payload);
+            await dMongoHandler.handleEvent(mongoEvent, () => {});
+            await dESHandler.handleEvent(esEvent, () => {});
+            await testbroker.destroyEvent(e);
         }
-    });
-    await waitAsync(waitTimeout || 1); // Needed
+    }
 }
 
 function stopDenormalizer() {
     testbroker.stopPoll();
+}
+
+async function esSearch(id, verbose) {
+    const res = await esClient.search({
+        index: esOptions.index,
+        q: `_id: ${id}`,
+    });
+    if (verbose) console.log(res.body);
+    if (res.body.hits.hits.length == 0)
+        return { body: null };
+    return { body: res.body.hits.hits[0]._source };
 }
 
 describe('Integration test', function () {
@@ -78,12 +132,16 @@ describe('Integration test', function () {
     before(async function () {
         this.timeout(20000);
         repo.reset();
-        await setUpMongo();
+        mongoOptions.connString = await mongod.getConnectionString();
+        await setUpMongoClient();
+        await setUpESClient('location.coordinates');
         await setUpQuery();
         await setUpDenormalizer();
         app = appFunc(businessManager, queryMgr);
         req = request(app);
     });
+
+    beforeEach(() => esClient.indices.refresh({ index: esOptions.index }));
 
     after(async function () {
         this.timeout(20000);
@@ -131,6 +189,7 @@ describe('Integration test', function () {
                 })
                 .expect(200);
         });
+
         it('POST\t/restaurant-catalog-service/restaurant/remove', async function () {
             await req.post('/restaurant-catalog-service/restaurant/remove')
                 .set('Content-Type', 'application/json')
@@ -146,7 +205,7 @@ describe('Integration test', function () {
         });
     });
     
-    context('Add and remove tables from restaurant', function () {
+    context('Modify restaurant', function () {
         const name = 'I quattro cantoni';
         const owner = 'Giacomo';
         const rest = new Restaurant(uuid(), name, owner, lib.defaultTimetable, lib.defaultMenu, lib.defaultPhone);
@@ -204,7 +263,7 @@ describe('Integration test', function () {
             await processEvents();
         });
         
-        it('DELETE\t/restaurant-catalog-service/restaurants/${rest.restId}/tables/${tableId}', async function () {
+        it(`DELETE\t/restaurant-catalog-service/restaurants/${rest.restId}/tables/${table.id}`, async function () {
             await req.delete(`/restaurant-catalog-service/restaurants/${rest.restId}/tables/${table.id}`)
                 .set('Content-Type', 'application/json')
                 .expect({})
@@ -281,7 +340,7 @@ describe('Integration test', function () {
         });
 
         it(`POST\t/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections`, async function () {
-            
+
             const menuSectionErr = Object.assign({}, menuSection);
             delete menuSectionErr.name;
             await req.post(`/restaurant-catalog-service/restaurants/${rest.restId}/menu/menuSections`)
@@ -413,6 +472,125 @@ describe('Integration test', function () {
                     assert.deepStrictEqual(actual, undefined);
                 })
                 .expect(200);
+        });
+
+        it(`POST\t/restaurant-catalog-service/restaurants/${rest.restId}/location`, async function () {
+            const location = lib.defaultLocation;
+
+            const inputs = {
+                url: `/restaurant-catalog-service/restaurants/${rest.restId}/location`,
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                requests: [
+                    {
+                        body: {},
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: {} },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: '', lon: '' } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lon: 44 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: 44 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: 44, lon: 200 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: 92, lon: 100 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { address: location.address },
+                        expectBody: null,
+                        expectCode: 500, // 200,
+                    }, {
+                        body: { coordinates: location.coordinates },
+                        expectBody: null,
+                        expectCode: 200,
+                    },
+                ]
+            }
+
+            await apilib.runTest(req, inputs);
+            await processEvents();
+        });
+
+        it(`GET\t/restaurant-catalog-service/restaurants`, async function () {
+            const location = lib.defaultLocation;
+            const baseUrl = `/restaurant-catalog-service/restaurants`;
+
+            const assertSameLocation = (res) => {
+                const actual = res.body.restaurants.filter(r => r.restId == rest.restId)[0];
+                const expected = JSON.parse(JSON.stringify(location));
+                expected.address = "mockAddress";
+                assert.deepStrictEqual(actual.location, expected);
+            };
+
+            const inputs = {
+                url: `/restaurant-catalog-service/restaurants`,
+                method: 'get',
+                headers: { 'Content-Type': 'application/json' },
+                requests: [
+                    {
+                        body: {},
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: {} },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: '', lon: '' } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lon: 44 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: 44 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: 44, lon: 200 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        body: { coordinates: { lat: 92, lon: 100 } },
+                        expectBody: null,
+                        expectCode: 400,
+                    }, {
+                        url: `${baseUrl}?address=${location.address}`,
+                        expectBody: null,
+                        expectCode: 500, // 200,
+                    }, {
+                        url: `${baseUrl}?coordinates=${JSON.stringify(location.coordinates)}`,
+                        expectBody: assertSameLocation,
+                        expectCode: 200,
+                    }, {
+                        url: `${baseUrl}?coordinates=${JSON.stringify({ lat: 44.4991397, lon: 7.5859324 })}`,
+                        expectBody: (res) => {
+                            assertSameLocation(res);
+                            assert.ok(res.body.radius > 500);
+                        },
+                        expectCode: 200,
+                    }
+                ],
+            };
+            
+            await apilib.runTest(req, inputs);
+            
         });
     });
 });

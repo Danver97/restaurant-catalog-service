@@ -50,6 +50,14 @@ schemas:
     Timetable:
         type: DayTimetable[]
         maxItems: 7
+    Coordinates:
+        properties:
+            lat: number
+            lon: number
+    Location:
+        properties:
+            address: string
+            coordinates: Coordinates
     Review:
         properties:
             score: integer
@@ -67,7 +75,7 @@ schemas:
             telephone:
                 type: string
                 pattern: ^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{9})$
-            # location: x, y
+            location: Location
             # recensioni: da definire
 
 /restaurants:
@@ -86,6 +94,41 @@ schemas:
                 body:
                     application/json:
                         type: Error
+    get:
+        description: Gets nearby restaurants
+        headers:
+        queryParameters:
+            coordinates:
+                description: Coordinates near to which search
+                type: Coordinates
+            address:
+                description: Address near to which search
+                type: string
+            offset:
+                description: Offset used for pagination (optional)
+                type: number
+            radius:
+                description: Radius used for the search of the query
+                type: number
+        responses:
+            200:
+                body:
+                    application/json:
+                        properties:
+                            restaurants:
+                                description: The list of restaurants
+                                type: Restaurant[]
+                            hits:
+                                description: The total number of restaurants found
+                                type: number
+                            radius:
+                                description: Radius used for the query in meters
+                                type: number
+            400:
+                body:
+                    application/json:
+                        type: Error
+
     /{restId}: 
         get:
             description: Get a restaurant information by giving the restaurant id
@@ -280,6 +323,21 @@ schemas:
                         properties:
                             restId: UUID
                             timetable: Timetable
+                responses: 
+                    200:
+                        body:
+                            application/json:
+                    400:
+                        body:
+                            application/json:
+                                type: Error
+        /location:
+            post:
+                description: Set restaurant's location
+                headers: 
+                body: 
+                    application/json:
+                        type: Location
                 responses: 
                     200:
                         body:
