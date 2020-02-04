@@ -196,6 +196,23 @@ describe('writer unit test', function () {
         const doc = await collection.findOne({ _id: rest.restId });
         assert.deepStrictEqual(doc, toJSON(rest));
     });
+
+    it('check if locationChanged works', async function () {
+        // Preset
+        await collection.insertOne(toJSON(rest));
+
+        // Update to do
+        rest.location = utils.defaultLocation;
+        rest._revisionId++;
+
+        // Update done
+        const e = new Event(rest.restId, 2, 'locationChanged', { id: rest.restId, location: toJSON(rest.location) });
+        await writer.locationChanged(rest.restId, e.eventId - 1, e.payload.location);
+
+        // Assertions
+        const doc = await collection.findOne({ _id: rest.restId });
+        assert.deepStrictEqual(doc, toJSON(rest));
+    });
     
     it('check if restaurantRemoved works', async function () {
         // Preset

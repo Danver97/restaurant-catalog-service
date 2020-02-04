@@ -30,6 +30,10 @@ class EventHandler {
         return this.writer.tableRemoved(e.streamId, e.eventId - 1, e.payload.tables, cb);
     }
     
+    locationChanged(e, cb) {
+        return this.writer.locationChanged(e.streamId, e.eventId - 1, e.payload.location, cb);
+    }
+    
     timetableChanged(e, cb) {
         return this.writer.timetableChanged(e.streamId, e.eventId - 1, e.payload.timetable, cb);
     }

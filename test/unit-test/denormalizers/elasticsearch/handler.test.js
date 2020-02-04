@@ -255,6 +255,26 @@ describe('handler unit test', function () {
         const doc = res.body;
         assert.deepStrictEqual(doc, toJSON(rest));
     });
+    
+    it('check if locationChanged event is handled properly', async function () {
+        // Preset
+        await client.insertOne(toJSON(rest));
+        await client.refresh();
+        await orderControl.updateLastProcessedEvent(rest.restId, 0, 1);
+
+        // Update to do
+        rest.location = utils.defaultLocation;
+
+        // Update done
+        const e = new Event(rest.restId, 2, 'locationChanged', { id: rest.restId, location: toJSON(rest.location) });
+        await handler.handleEvent(e);
+
+        // Assertions
+        await client.refresh();
+        const res = await client.search(rest.restId);
+        const doc = res.body;
+        assert.deepStrictEqual(doc, toJSON(rest));
+    });
 
     it('check if restaurantRemoved event is handled properly', async function () {
         // Preset

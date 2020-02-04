@@ -227,6 +227,25 @@ describe('writer unit test', function () {
         const doc = res.body;
         assert.deepStrictEqual(doc, toJSON(rest));
     });
+
+    it('check if locationChanged works', async function () {
+        // Preset
+        await client.insertOne(toJSON(rest));
+        await client.refresh();
+
+        // Update to do
+        rest.location = utils.defaultLocation;
+
+        // Update done
+        const e = new Event(rest.restId, 2, 'locationChanged', { id: rest.restId, location: toJSON(rest.location) });
+        await writer.locationChanged(rest.restId, e.eventId - 1, e.payload.location);
+
+        // Assertions
+        await client.refresh();
+        const res = await client.search(rest.restId);
+        const doc = res.body;
+        assert.deepStrictEqual(doc, toJSON(rest));
+    });
     
     it('check if restaurantRemoved works', async function () {
         // Preset

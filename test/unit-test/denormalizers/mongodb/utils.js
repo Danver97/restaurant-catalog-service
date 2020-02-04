@@ -27,4 +27,5 @@ module.exports = {
     defaultMenu1: restUtils.defaultMenu,
     defaultMenu2: restUtils.defaultMenu2,
     defaultMenu3: restUtils.defaultMenu3,
+    defaultLocation: restUtils.defaultLocation,
 };

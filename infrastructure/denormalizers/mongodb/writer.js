@@ -98,6 +98,16 @@ class Writer {
         );
     }
 
+    locationChanged(restaurantId, _revisionId, location, cb) {
+        return Promisify(
+            () => this.collection.updateOne(
+                { _id: restaurantId, _revisionId },
+                { $set: { location }, $inc: { _revisionId: 1 } },
+            ),
+            cb,
+        );
+    }
+
     timetableChanged(restaurantId, _revisionId, timetable, cb) {
         return Promisify(
             () => this.collection.updateOne(

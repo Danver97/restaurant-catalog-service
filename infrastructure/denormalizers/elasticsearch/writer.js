@@ -97,6 +97,16 @@ class Writer {
             } } */
         }), cb);
     }
+    
+    locationChanged(restaurantId, _revisionId, location, cb) {
+        return Promisify(() => this.client.update({
+            index: this.indexName,
+            id: restaurantId,
+            body: { doc: {
+                location
+            } }
+        }), cb);
+    }
 
     timetableChanged(restaurantId, _revisionId, timetable, cb) {
         return Promisify(() => this.client.update({
