@@ -63,7 +63,7 @@ class EventHandler {
         };
         if (types[type] < types[this.logLevel])
             return;
-        console[type](msg);
+        console[type](`MongoHandler: ${msg}`);
     }
 
     async handleEvent(e, ack) {

@@ -63,7 +63,7 @@ class EventHandler {
         };
         if (types[type] < types[this.logLevel])
             return;
-        console[type](msg);
+        console[type](`ESHandler: ${msg}`);
     }
 
     async handleEvent(e, ack) {
